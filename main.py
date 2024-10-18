@@ -13,4 +13,6 @@ def on_draw():
     window.clear()
     label.draw()
     
+    
+print("new thing")
 pyglet.app.run()
