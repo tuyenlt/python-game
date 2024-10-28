@@ -1,7 +1,7 @@
 import pygame
 import math
 import os
-
+import json
 from game.settings import *
 from game.ultis.resource_loader import *
 
@@ -17,11 +17,12 @@ class Player(pygame.sprite.Sprite):
         self.hitbox = self.rect
         self.team = team
         self.id = id
+        self.hp = 100
         
         #* attr init
         self.angle = 0
         self.direction = pygame.math.Vector2()
-        self.speed = 10
+        self.speed = 5
         self.bullets_sprites = []
     
     def handle_key_input(self):
@@ -93,5 +94,11 @@ class Player(pygame.sprite.Sprite):
         self.handle_key_input()
         self.handle_movement()
         
+    def to_json_string(self):
+        data = {
+            'pos' : self.rect.topleft,
+            'hp' : self.hp,
+            'angle': self.angle,
+        }
         
         

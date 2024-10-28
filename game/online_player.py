@@ -11,18 +11,22 @@ class OnlinePlayer(Player):
         self.time = 0
     
     def handle_angle(self):
-        self.angle = random.randint(0,360)
         self.image = pygame.transform.rotate(self.org_image, -self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.hitbox.center
     
+    def load_data(self, data):
+        self.hitbox.center = data['pos']
+        self.hp = data['hp']
+        self.angle = data['angle']
+    
     def update(self):
+        self.handle_angle()
         # update from the server
-        self.handle_movement()
-        self.time += 1
-        if self.time % 100 == 0:
-            self.direction.x = (random.randint(0,10) - 5) / 10 
-            self.direction.y = (random.randint(0,10) - 5) / 10
-        if self.time % 20 == 0:
-            self.handle_angle()
+        # self.handle_movement()
+        # self.time += 1
+        # if self.time % 100 == 0:
+        #     self.direction.x = (random.randint(0,10) - 5) / 10 
+        #     self.direction.y = (random.randint(0,10) - 5) / 10
+        # if self.time % 20 == 0:
         pass    
