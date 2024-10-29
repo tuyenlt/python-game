@@ -14,9 +14,9 @@ class Map:
         self.obstacles_sprites = pygame.sprite.Group()
         self.bullets_sprites = pygame.sprite.Group()
         self.online_player = pygame.sprite.Group()
+        self.totals_player = pygame.sprite.Group()
         self.bullets = []
         self.bullets_data = []
-        self.data = {}
         self.player_id = []
         self.network = Network()
         self.create_map()
@@ -34,7 +34,7 @@ class Map:
                 if col != -1:
                     Tile((x, y),[self.visible_sprites, self.obstacles_sprites], get_tile_texture('./assets/maps/dust2.bmp',col,TILE_SIZE))                    
         id = input()
-        self.local_player = Player((1300, 1200),[self.visible_sprites], self.obstacles_sprites,"ct", id)
+        self.local_player = Player((1300, 1200),[self.visible_sprites, self.totals_player], self.obstacles_sprites,"ct", id)
         self.player_id.append(id)
         self.network.player_init(id)
         self.visible_sprites.set_local_player(self.local_player)
@@ -52,7 +52,7 @@ class Map:
                 # self.firing_sound.play()
                 # Bullet(self.local_player.hitbox.center, self.local_player.angle, [self.bullets_sprites, self.visible_sprites],"tuyenlt")
                 new_bullet = LineBullet(self.local_player.hitbox.center, self.local_player.angle, 
-                                               self.local_player.id,self.obstacles_sprites, self.online_player)
+                                               self.local_player.id, self.obstacles_sprites, self.totals_player)
                 self.bullets.append(new_bullet)
                 self.bullets_data.append(new_bullet.to_object_value())
     
@@ -75,14 +75,18 @@ class Map:
         for key in self.network.server_data['player'].keys():
             if key not in self.player_id and key != 'bullets':
                 self.player_id.append(key)
-                self.online_player.add(OnlinePlayer(self.network.server_data['player'][key]['pos'], [self.visible_sprites], self.obstacles_sprites, "t", key))
+                self.online_player.add(OnlinePlayer(self.network.server_data['player'][key]['pos'], [self.visible_sprites, self.totals_player], self.obstacles_sprites, "t", key))
         for player in self.online_player:
             player.load_data(self.network.server_data['player'][player.id])
         
         for (start_pos, end_pos, angle, id) in self.network.server_data['player'][self.local_player.id]['online_bullets']:
             print(start_pos, end_pos, angle, id)
             self.bullets.append(LineBullet(start_pos, angle, 
-                                               id, self.obstacles_sprites))
+                                               id, self.obstacles_sprites, self.totals_player))
+            
+        for player in self.totals_player:
+            if player.hp <= 0:
+                player.kill()
         
                      
     def run(self, mouse_clicking= False):
