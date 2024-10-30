@@ -47,3 +47,16 @@ def get_animation_from_img(file_path, animation_size, color_key):
             animation_rect = pygame.Rect(x_index * animation_size, y_index * animation_size, animation_size, animation_size)
             animations_list.append(img.subsurface(animation_rect))
     return animations_list
+
+def get_sprite_from_sheet(sprite_sheet , size, index):
+    img_width, img_height = sprite_sheet.get_size()
+    tiles_per_row = img_width // size
+    tiles_per_col = img_height // size
+    
+    x_index = index % tiles_per_row
+    y_index = index // tiles_per_row
+    
+    tile_rect = pygame.Rect(x_index * size, y_index * size, size, size)
+    
+    tile_texture = sprite_sheet.subsurface(tile_rect)
+    return tile_texture.convert_alpha()

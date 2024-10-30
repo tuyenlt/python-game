@@ -6,7 +6,7 @@ from game.player import Player
 from game.online_player import OnlinePlayer
 from game.tile import Tile
 from game.network import Network
-from game.gun import Gun
+from game.weapon import Gun, Knife
 from game.input_event import InputEvent
 
 class Map:
@@ -16,6 +16,9 @@ class Map:
         self.obstacles_sprites = pygame.sprite.Group()
         self.online_player = pygame.sprite.Group()
         self.totals_player = pygame.sprite.Group()
+        LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
+        Gun.set_sprite_groups(self.visible_sprites)
+        Knife.set_sprite_groups(self.visible_sprites)
         self.bullets = []
         self.bullets_data = []
         self.player_id = []
@@ -24,7 +27,7 @@ class Map:
         self.pygame_events = None
         self.events = InputEvent()
         # self.firing_sound = pygame.mixer.Sound('./assets/sounds/ak47.wav')
-        LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
+        
         
     def create_map(self):
         layouts = {
@@ -37,11 +40,11 @@ class Map:
                 if val != -1:
                     Tile((x, y),[self.visible_sprites, self.obstacles_sprites], get_tile_texture('./assets/maps/dust2/dust2_tiles.png', val, TILE_SIZE))                    
         id = "tuyenlt"
-        id = input()
-        self.local_player = Player((1300, 1200),[self.visible_sprites, self.totals_player], self.obstacles_sprites,"ct", id)
+        # id = input()
+        self.local_player = Player((1300, 1200),[self.visible_sprites, self.totals_player], self.obstacles_sprites,"t", id)
         self.player_id.append(id)
         self.network.player_init(id)
-        self.local_player.set_selected_weapon(Gun(self.visible_sprites, self.local_player, name="ak47"))
+        # self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
         self.visible_sprites.set_local_player(self.local_player)
         
                     
@@ -51,19 +54,13 @@ class Map:
                     
                      
     def event_handle(self):
-        
         if self.events.mouse_clicking:
-            if self.local_player.selected_weapon:
-                print(self.local_player.selected_weapon)
-                self.local_player.selected_weapon.fire(self.bullets, self.bullets_data)            
-        # for event in self.events:
-        #     #* handle local player shooting bullet
-        #     if event.type == pygame.MOUSEBUTTONDOWN:
-        #         # self.firing_sound.play()
-        #         new_bullet = LineBullet(self.local_player.hitbox.center, self.local_player.angle,
-        #                                        self.local_player.id, 20, False)
-        #         self.bullets.append(new_bullet)
-        #         self.bullets_data.append(new_bullet.to_object_value())
+            if self.local_player.selected_weapon and self.local_player.selected_weapon.type == "auto":
+                self.local_player.selected_weapon.fire(self.bullets, self.bullets_data)       
+        def on_click():
+            if self.local_player.selected_weapon and self.local_player.selected_weapon.type == "single": 
+                self.local_player.selected_weapon.fire(self.bullets, self.bullets_data)
+        self.events.on_click_callback = on_click
     
     def network_update(self):
         self.network.local_data = {
@@ -84,8 +81,8 @@ class Map:
         for key in self.network.server_data['player'].keys():
             if key not in self.player_id and key != 'bullets':
                 self.player_id.append(key)
-                new_player = OnlinePlayer(self.network.server_data['player'][key]['pos'], [self.visible_sprites, self.totals_player], self.obstacles_sprites, "t", key)
-                new_player.set_selected_weapon(Gun(self.visible_sprites, new_player ,self.network.server_data['player'][key]['weapon']))
+                new_player = OnlinePlayer(self.network.server_data['player'][key]['pos'], [self.visible_sprites, self.totals_player], self.obstacles_sprites, "ct", key)
+                new_player.set_selected_weapon(Gun(new_player ,self.network.server_data['player'][key]['weapon']))
                 self.online_player.add(new_player)
                 print(new_player.selected_weapon)
                 
