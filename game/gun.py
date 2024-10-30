@@ -24,21 +24,21 @@ class Gun(pygame.sprite.Sprite):
         self.angle = 0
         self.fire_cooldown = self.fire_rate
         self.reload_time_cnt = self.reload_time
-        self.decoil_cnt = 0
+        self.recoil_cnt = 0
     
     def gun_attr_init(self):
         if self.name == "ak47":            
             self.type = "auto"
             self.fire_rate = 0.1
-            self.decoil = 6
+            self.recoil = 6
             self.max_bullets = 30
             self.reload_time = 3
             self.dmg = 20
-            self.decoil_increase = 1
+            self.recoil_increase = 1
         else :
             self.type = "auto"
             self.fire_rate = 0.1
-            self.decoil = 5
+            self.recoil = 5
             self.max_bullets = 30
             self.reload_time = 1
             self.dmg = 10
@@ -57,21 +57,21 @@ class Gun(pygame.sprite.Sprite):
         if self.fire_cooldown > 0 or self.bullets_remain == 0:
             return
         if self.fire_cooldown > -self.fire_rate:
-            if self.decoil_cnt != 0:
-                decoil = random.randrange(-self.decoil_cnt, self.decoil_cnt)
+            if self.recoil_cnt != 0:
+                recoil = random.randrange(-self.recoil_cnt, self.recoil_cnt)
             else:
-                decoil = 0
-            if self.decoil_cnt < self.decoil:
-                self.decoil_cnt += self.decoil_increase
+                recoil = 0
+            if self.recoil_cnt < self.recoil:
+                self.recoil_cnt += self.recoil_increase
         else:
-            decoil = 0
-            self.decoil_cnt = 0
+            recoil = 0
+            self.recoil_cnt = 0
             
         self.fire_cooldown = self.fire_rate
         self.fire_sound.stop()
         self.fire_sound.play()
         self.bullets_remain -= 1
-        new_bullet = LineBullet(self.owner.hitbox.center, self.angle + decoil, self.owner.id, self.dmg)
+        new_bullet = LineBullet(self.owner.hitbox.center, self.angle + recoil, self.owner.id, self.dmg)
         bullets_list.append(new_bullet)
         bullets_data.append(new_bullet.to_object_value())
     
