@@ -1,18 +1,18 @@
 from csv import reader
 import pygame
 
-def import_csv_layout(file_path, tile_index = None):
+def import_csv_layout(file_path, tiles_index = []):
     terain_map = []
     with open(file_path) as level_map:
         layout = reader(level_map, delimiter=",")
         for row in layout:
-            if tile_index == None:
+            if tiles_index == []:
                 terain_map.append(list(row))
                 continue
             filltered_row = []
             for tile in row:
-                if int(tile) == int(tile_index):
-                    filltered_row.append(tile_index)
+                if int(tile) in tiles_index:
+                    filltered_row.append(int(tile))
                 else:
                     filltered_row.append(-1)
             terain_map.append(filltered_row)
@@ -21,7 +21,7 @@ def import_csv_layout(file_path, tile_index = None):
 
 def get_tile_texture(file_path, texture_index, tile_size):
     img = pygame.image.load(file_path).convert_alpha()
-    img.set_colorkey((0,0,0))
+    # img.set_colorkey((0,0,0))
     
     img_width, img_height = img.get_size()
     tiles_per_row = img_width // tile_size

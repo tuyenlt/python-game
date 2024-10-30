@@ -19,7 +19,8 @@ class Network:
                 'hp' : 100,
                 'angle': 90,
                 'local_bullets' : [],
-                'online_bullets' : []
+                'online_bullets' : [],
+                'weapon': None,
             },
         }
         self.server_data = {}

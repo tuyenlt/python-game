@@ -14,6 +14,8 @@ class OnlinePlayer(Player):
         self.image = pygame.transform.rotate(self.org_image, -self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.hitbox.center
+        if self.selected_weapon:
+            self.selected_weapon.rotate(-self.angle)
     
     def load_data(self, data):
         self.hitbox.center = data['pos']

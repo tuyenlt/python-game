@@ -20,7 +20,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.map.network.shut_down()
                     sys.exit()
-            self.map.update_events(self.events)    
+            self.map.update_pygame_events(self.events)    
             self.screen.fill((255, 255, 255))
             self.map.run()
             pygame.display.update()

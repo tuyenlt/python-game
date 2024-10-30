@@ -4,13 +4,14 @@ import os
 import json
 from game.settings import *
 from game.ultis.resource_loader import *
+from game.gun import Gun
 
 class Player(pygame.sprite.Sprite):
     
     def __init__(self, spwan_pos, sprite_groups, obtacles_sprites, team = "ct", id = "tuyenlt"):
         super().__init__(sprite_groups)
         #* display init
-        self.org_image = get_tile_texture(f'./assets/player/{team}1.bmp', 0, 64)
+        self.org_image = get_tile_texture(f'./assets/gfx/player/{team}1.bmp', 0, 64)
         self.image = self.org_image
         self.obtacles_sprites = obtacles_sprites
         self.rect = self.image.get_rect(topleft = spwan_pos)
@@ -18,12 +19,15 @@ class Player(pygame.sprite.Sprite):
         self.team = team
         self.id = id
         self.hp = 100
+        self.selected_weapon = []
         
         #* attr init
         self.angle = 0
         self.direction = pygame.math.Vector2()
         self.speed = 5
-        self.bullets_sprites = []
+    
+    def set_selected_weapon(self, weapon):
+        self.selected_weapon = weapon
     
     def handle_key_input(self):
         keys = pygame.key.get_pressed()
@@ -79,20 +83,22 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.org_image, -self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.hitbox.center
+        if self.selected_weapon:
+            self.selected_weapon.rotate(-self.angle)
+        
     
     def display(self, surf, offset):
         offset_pos = self.hitbox.center - offset
-        surf.blit(self.image, offset_pos)
-    
+        surf.blit(self.image, offset_pos)    
     
     def handle_pygame_event(self, events : pygame.event.EventType):
         pass                
         
         
     def update(self):
-        self.handle_angle()
         self.handle_key_input()
         self.handle_movement()
+        self.handle_angle()
         
     def to_json_string(self):
         data = {

@@ -31,32 +31,43 @@ class Bullet(pygame.sprite.Sprite):
         self.movement()
 
 class LineBullet():
-    RANGE_BUFFER = 10000
-    def __init__(self,start_pos,angle, owner, obtacles, players):
+    RANGE_BUFFER = 10000000
+    obtacles = []
+    players = []
+    def __init__(self,start_pos, angle, owner, dmg, online = False):
         self.angle = angle
         (x, y) = start_pos
-        x += math.cos(self.angle * (2 * math.pi / 360)) * 40
-        y += math.sin(self.angle * (2 * math.pi / 360)) * 40
+        if not online:
+            x += math.cos(self.angle * (2 * math.pi / 360)) * 40
+            y += math.sin(self.angle * (2 * math.pi / 360)) * 40
         self.start_pos = (x, y)
         self.end_x = start_pos[0] + math.cos(self.angle * (2 * math.pi / 360)) * self.RANGE_BUFFER
         self.end_y = start_pos[1] + math.sin(self.angle * (2 * math.pi / 360)) * self.RANGE_BUFFER
+        print(self.end_x, self.end_y)
         self.owner = owner
-        self.caculate_hit_pos(obtacles, players)
+        self.dmg = dmg
+        self.caculate_hit_pos()
         self.color = (255,255,0)
-        self.display_frame = 5
+        self.display_frame = 4
+    
+    @classmethod
+    def init_hit_obtacles(cls, obtacles_groups, players_groups):
+        cls.obtacles = obtacles_groups
+        cls.players  = players_groups
     
     def to_object_value(self):
         return (self.start_pos, (self.end_x, self.end_y), self.angle, self.owner)
     
-    def caculate_hit_pos(self, obtacles, players):
+    def caculate_hit_pos(self):
         possible_hit_pos = []
-        for obtacle in obtacles:
+        for obtacle in self.obtacles:
             obtacle_x, obtacle_y = obtacle.rect.topleft
             hit_pos = liang_barsky((obtacle_x, obtacle_y, obtacle_x + TILE_SIZE, obtacle_y + TILE_SIZE), self.start_pos, (self.end_x, self.end_y))
             if hit_pos != None:
                 possible_hit_pos.append(hit_pos)
                 
-        for player in players:
+        for player in self.players:
+            if player.id == self.owner: continue
             player_x, player_y = player.hitbox.topleft
             hit_pos = liang_barsky((player_x, player_y, player_x + PLAYER_SIZE, player_y + PLAYER_SIZE), self.start_pos, (self.end_x, self.end_y))
             if hit_pos != None:
