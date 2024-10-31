@@ -1,4 +1,5 @@
 import pygame, random
+from functools import partial
 from game.bullet import Bullet, LineBullet
 from game.ultis.resource_loader import import_csv_layout, get_tile_texture, get_animation_from_img
 from game.settings import *
@@ -10,7 +11,6 @@ from game.weapon import Gun, Knife
 from game.input_event import InputEvent
 from game.leg import Leg
 from game.ui.ui import UI
-from functools import partial
 class Map:
     def __init__(self):
         self.display_surface =  pygame.display.get_surface() 
@@ -37,6 +37,7 @@ class Map:
         
         # UI
         self.ui = UI()
+        
     def create_map(self):
         layouts = {
             'boundary': import_csv_layout('./assets/maps/dust2/dust2.csv',range(5,30)),
@@ -62,10 +63,10 @@ class Map:
                     self.ct_spawn.append((x,y))
                     
         
-        # id = "tuyenlt"
-        # team = "t"
-        id = input()
-        team = input()
+        id = "tuyenlt"
+        team = "t"
+        # id = input()
+        # team = input()
         if team == "ct":
             spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
         if team == "t":
@@ -73,9 +74,9 @@ class Map:
             
         self.local_player = Player(spawn_pos,[self.visible_sprites, self.totals_player], self.obstacles_sprites,team, id)
         self.player_id.append(id)
-        # self.network.player_init(id, team)
-        # self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id, (100, 100))
-        # self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
+        self.network.player_init(id, team)
+        self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id, (100, 100))
+        self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
         self.visible_sprites.set_local_player(self.local_player)
         
         
@@ -135,7 +136,7 @@ class Map:
     def run(self, mouse_clicking = False):
         self.event_handle()
         self.visible_sprites.update()
-        # self.network_update()
+        self.network_update()
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)
                 
