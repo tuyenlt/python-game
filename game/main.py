@@ -2,6 +2,7 @@ import pygame, sys
 from pygame.locals import *
 from game.settings import *
 from game.map import Map
+from game.ui.button import Button
 
 class Game:
     def __init__(self):
@@ -20,8 +21,8 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.map.network.shut_down()
                     sys.exit()
-            self.map.update_pygame_events(self.events)    
             self.screen.fill((255, 255, 255))
+            self.map.update_pygame_events(self.events)    
             self.map.run()
             
             #draw pointer

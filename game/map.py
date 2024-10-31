@@ -9,6 +9,7 @@ from game.network import Network
 from game.weapon import Gun, Knife
 from game.input_event import InputEvent
 from game.leg import Leg
+
 class Map:
     def __init__(self):
         self.display_surface =  pygame.display.get_surface() 

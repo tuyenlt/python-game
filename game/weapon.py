@@ -26,16 +26,17 @@ class Gun(pygame.sprite.Sprite):
         self.name = name
         self.owner = owner
         self.gun_attr_init()
+        
         self.fire_sound = pygame.mixer.Sound(f"./assets/sounds/weapons/{self.name}.wav")
-        self.fire_sound.set_volume(30)
+        self.fire_sound.set_volume(10)
         self.org_image = pygame.image.load(f"./assets/gfx/weapons/{self.name}.bmp").convert_alpha()
         self.reload_start_sound = pygame.mixer.Sound("./assets/sounds/weapons/reloadstart.wav")
         self.reload_end_sound = pygame.mixer.Sound("./assets/sounds/weapons/reloadend.wav")
+        
         self.image = self.org_image
         self.rect = self.image.get_rect()
         self.offset_x = math.cos(10 * (2 * math.pi / 360)) * 20
         self.offset_y = math.sin(10 * (2 * math.pi / 360)) * 20
-        self.gun_attr_init()
         self.angle = 0
         self.fire_cooldown = self.fire_rate
         self.reload_time_cnt = self.reload_time
