@@ -24,7 +24,7 @@ class Map:
         self.bullets = []
         self.bullets_data = []
         self.player_id = []
-        self.network = Network()
+        # self.network = Network()
         self.create_map()
         self.pygame_events = None
         self.events = InputEvent()
@@ -62,10 +62,10 @@ class Map:
                     self.ct_spawn.append((x,y))
                     
         
-        # id = "tuyenlt"
-        # team = "t"
-        id = input()
-        team = input()
+        id = "tuyenlt"
+        team = "t"
+        # id = input()
+        # team = input()
         if team == "ct":
             spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
         if team == "t":
@@ -137,7 +137,6 @@ class Map:
         self.network_update()
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)
-        
         
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
