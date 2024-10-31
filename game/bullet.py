@@ -44,7 +44,6 @@ class LineBullet():
         self.start_pos = (x, y)
         self.end_x = start_pos[0] + math.cos(self.angle * (2 * math.pi / 360)) * self.RANGE_BUFFER
         self.end_y = start_pos[1] + math.sin(self.angle * (2 * math.pi / 360)) * self.RANGE_BUFFER
-        print(self.end_x, self.end_y)
         self.owner = owner
         self.dmg = dmg
         self.caculate_hit_pos()
@@ -65,9 +64,12 @@ class LineBullet():
             hit_pos = liang_barsky((obtacle_x, obtacle_y, obtacle_x + TILE_SIZE, obtacle_y + TILE_SIZE), self.start_pos, (self.end_x, self.end_y))
             if hit_pos != None:
                 possible_hit_pos.append(hit_pos)
-                
+        possible_hit_pos.sort(key = lambda pos : distance(pos, self.start_pos))
+        (self.end_x, self.end_y) = possible_hit_pos[0]        
+        
+        
         for player in self.players:
-            if player.id == self.owner: continue
+            if player.id == self.owner or player.dead == True: continue
             player_x, player_y = player.hitbox.topleft
             hit_pos = liang_barsky((player_x, player_y, player_x + PLAYER_SIZE, player_y + PLAYER_SIZE), self.start_pos, (self.end_x, self.end_y))
             if hit_pos != None:

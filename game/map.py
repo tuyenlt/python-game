@@ -24,7 +24,7 @@ class Map:
         self.bullets = []
         self.bullets_data = []
         self.player_id = []
-        # self.network = Network()
+        self.network = Network()
         self.create_map()
         self.pygame_events = None
         self.events = InputEvent()
@@ -47,7 +47,7 @@ class Map:
                 x = col_index * TILE_SIZE
                 y = row_index * TILE_SIZE
                 if val != -1:
-                    Tile((x, y),[self.visible_sprites, self.obstacles_sprites], get_tile_texture('./assets/maps/dust2/dust2_tiles.png', val, TILE_SIZE))                    
+                    Tile((x, y),[self.visible_sprites, self.obstacles_sprites])                    
                     
         self.t_spawn = []
         self.ct_spawn = []
@@ -62,10 +62,10 @@ class Map:
                     self.ct_spawn.append((x,y))
                     
         
-        id = "tuyenlt"
-        team = "t"
-        # id = input()
-        # team = input()
+        # id = "tuyenlt"
+        # team = "t"
+        id = input()
+        team = input()
         if team == "ct":
             spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
         if team == "t":
@@ -78,6 +78,7 @@ class Map:
         # self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
         self.visible_sprites.set_local_player(self.local_player)
         
+        
     def create_leg_animation(self) :
         Leg(self.local_player, [self.visible_sprites])
                     
@@ -89,6 +90,7 @@ class Map:
         if self.events.mouse_clicking:
             if self.local_player.selected_weapon and self.local_player.selected_weapon.type == "auto":
                 self.local_player.selected_weapon.fire(self.bullets, self.bullets_data)       
+                
         def on_click():
             if self.local_player.selected_weapon and self.local_player.selected_weapon.type == "single": 
                 self.local_player.selected_weapon.fire(self.bullets, self.bullets_data)
@@ -121,14 +123,13 @@ class Map:
                 self.online_player.add(new_player)
                 print(new_player.selected_weapon)
                 
-        for player in self.online_player:
+        for player in self.totals_player:
             player.load_data(self.network.server_data['player'][player.id])
         
         for (start_pos, end_pos, angle, dmg, id) in self.network.server_data['player'][self.local_player.id]['online_bullets']:
             self.bullets.append(LineBullet(start_pos, angle, 
                                                id, dmg, True))
         
-        self.local_player.load_server_data(self.network.server_data['player'][self.local_player.id])
             
                      
     def run(self, mouse_clicking = False):
@@ -160,8 +161,8 @@ class CameraGroup(pygame.sprite.Group):
         self.display_surface.blit(self.floor_surf, floor_offset_pos) 
         
         for sprite in self.sprites():
-            if sprite.__class__.__name__ == 'Gun':
-                pass
+            if sprite.__class__.__name__ == 'Tile':
+                continue
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_pos)
         

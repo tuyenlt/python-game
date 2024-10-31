@@ -11,9 +11,12 @@ class Player(pygame.sprite.Sprite):
     
     def __init__(self, spwan_pos, sprite_groups, obtacles_sprites, team = "ct", id = "tuyenlt"):
         super().__init__(sprite_groups)
+        self.sprite_groups = sprite_groups[0]
         #* display init
         self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}1.bmp").convert_alpha()
         self.org_image = get_tile_texture(f'./assets/gfx/player/{team}1.bmp', 0, 64)
+        self.dead_image = pygame.image.load(f"./assets/gfx/player/dead.png")
+        
         self.image = self.org_image
         self.obtacles_sprites = obtacles_sprites
         self.sprite_index = 0
@@ -165,7 +168,7 @@ class Player(pygame.sprite.Sprite):
             self.onslash = False
         self.slash_time_cnt -= 1/FPS
     
-    def load_server_data(self, data):
+    def load_data(self, data):
         self.hp = data['hp']
         if self.dead == False:
             self.dead = data['dead']
@@ -178,16 +181,29 @@ class Player(pygame.sprite.Sprite):
         self.hp = 100
         self.dead = False
         self.respawn_call_back()
-            
+        self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
+        self.sprite_index = 0
+        Gun.sprite_groups.add(self.selected_weapon)
+        
     def update(self):
         if self.onslash:
             self.knife_slash_animation()
-        if self.dead: 
+        if self.dead:
+            if self.respawn_hook.time_cnt == self.respawn_hook.delay_time:
+                print("pass")
+                self.org_image = self.dead_image
+                self.image = self.org_image
+                self.rect = self.image.get_rect()
+                self.rect.center = self.hitbox.center
+                Gun.sprite_groups.remove(self.selected_weapon)
+                self.sprite_index = -1
+                
             self.respawn_hook.count_down(1/FPS)
-        self.handle_key_input()
-        self.handle_movement()
-        self.handle_angle()
-        
+        else:
+            self.handle_key_input()
+            self.handle_movement()
+            self.handle_angle()
+    
     def to_json_string(self):
         data = {
             'pos' : self.rect.topleft,
