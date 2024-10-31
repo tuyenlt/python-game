@@ -8,7 +8,7 @@ from game.weapon import Gun, Knife
 
 class Player(pygame.sprite.Sprite):
     
-    def __init__(self, spwan_pos, sprite_groups, obtacles_sprites, team = "ct", id = "tuyenlt"):
+    def __init__(self, spwan_pos, sprite_groups, obtacles_sprites, create_leg_animation, team = "ct", id = "tuyenlt"):
         super().__init__(sprite_groups)
         #* display init
         self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}1.bmp").convert_alpha()
@@ -60,6 +60,8 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         
         #********** movement input
+        if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d] :
+            self.create_leg_animation()
         if keys[pygame.K_w]:
             self.direction.y = -1
         elif keys[pygame.K_s]:
@@ -133,8 +135,9 @@ class Player(pygame.sprite.Sprite):
         
     
     def display(self, surf, offset):
-        offset_pos = self.hitbox.center - offset
+        offset_pos = self.hitbox.center - offset    
         surf.blit(self.image, offset_pos)    
+        # surf.blit(self.leg, offset_pos)    
     
     def knife_slash_animation(self): 
         if self.slash_time_cnt >= self.slash_time / 2:

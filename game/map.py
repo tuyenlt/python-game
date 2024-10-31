@@ -1,6 +1,6 @@
 import pygame, os
 from game.bullet import Bullet, LineBullet
-from game.ultis.resource_loader import import_csv_layout, get_tile_texture
+from game.ultis.resource_loader import import_csv_layout, get_tile_texture, get_animation_from_img
 from game.settings import *
 from game.player import Player
 from game.online_player import OnlinePlayer
@@ -8,7 +8,7 @@ from game.tile import Tile
 from game.network import Network
 from game.weapon import Gun, Knife
 from game.input_event import InputEvent
-
+from game.leg import Leg
 class Map:
     def __init__(self):
         self.display_surface =  pygame.display.get_surface() 
@@ -27,7 +27,11 @@ class Map:
         self.pygame_events = None
         self.events = InputEvent()
         # self.firing_sound = pygame.mixer.Sound('./assets/sounds/ak47.wav')
+        LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
         
+        #pointer 
+        self.pointer_image = get_animation_from_img('assets/images/pointer.bmp', 46, (255, 0, 255))[0]
+        self.pointer_rect = self.pointer_image.get_rect()
         
     def create_map(self):
         layouts = {
@@ -40,14 +44,15 @@ class Map:
                 if val != -1:
                     Tile((x, y),[self.visible_sprites, self.obstacles_sprites], get_tile_texture('./assets/maps/dust2/dust2_tiles.png', val, TILE_SIZE))                    
         id = "tuyenlt"
-        # id = input()
-        self.local_player = Player((1300, 1200),[self.visible_sprites, self.totals_player], self.obstacles_sprites,"t", id)
+        id = input()
+        self.local_player = Player((1300, 1200),[self.visible_sprites, self.totals_player], self.obstacles_sprites, self.create_leg_animation,"ct", id)
         self.player_id.append(id)
         self.network.player_init(id)
         # self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
         self.visible_sprites.set_local_player(self.local_player)
         
-                    
+    def create_leg_animation(self) :
+        Leg(self.local_player, [self.visible_sprites])
                     
     def update_pygame_events(self, events : list[pygame.event.EventType]):
         self.events.update_event(events)
