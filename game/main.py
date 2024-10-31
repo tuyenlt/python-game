@@ -4,6 +4,7 @@ from game.settings import *
 from game.map import Map
 from game.ui.button import Button
 
+
 class Game:
     def __init__(self):
         pygame.init()

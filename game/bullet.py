@@ -30,6 +30,7 @@ class Bullet(pygame.sprite.Sprite):
     def update(self):
         self.movement()
 
+
 class LineBullet():
     RANGE_BUFFER = 10000000
     obtacles = []
@@ -54,9 +55,8 @@ class LineBullet():
     def init_hit_obtacles(cls, obtacles_groups, players_groups):
         cls.obtacles = obtacles_groups
         cls.players  = players_groups
-    
     def to_object_value(self):
-        return (self.start_pos, (self.end_x, self.end_y), self.angle, self.owner)
+        return (self.start_pos, (self.end_x, self.end_y), self.angle, self.dmg ,self.owner)
     
     def caculate_hit_pos(self):
         possible_hit_pos = []

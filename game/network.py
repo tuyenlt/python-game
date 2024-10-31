@@ -25,10 +25,19 @@ class Network:
         }
         self.server_data = {}
 
-    def player_init(self, player_id):
+    def respawn_request(self, player_id, pos):
+        respawn_data = {
+            'flag' : 3,
+            'id' : player_id,
+            'pos': pos
+        }
+        self.client.send(json.dumps(respawn_data).encode())
+        
+    def player_init(self, player_id, team):
         init_data = {
             'flag' : 1,
             'id' : player_id,
+            'team' : team
         }
         self.client.send(json.dumps(init_data).encode())
 
