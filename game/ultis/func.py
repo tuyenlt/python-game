@@ -60,22 +60,26 @@ def liang_barsky(rect: Tuple[float, float, float, float],
     return clipped_points
 
 
-class TimerFunc:
+class TimerCallback:
     def __init__(self, delay_time, call_back_func):
         self.delay_time = delay_time
         self.time_cnt = delay_time
         self.call_back_func = call_back_func
         self.done = False
+        self.finished = True
     
-    def count_down(self, amount, condition = False):
-        if condition:
-            self.time_cnt -= amount
-            if self.time_cnt <= 0:
-                self.call_back_func()
-                self.done = True
-                self.time_cnt = self.delay_time
+    def count_down(self, amount):
+        self.finished = False
+        self.time_cnt -= amount
+        print(self.time_cnt)
+        if self.time_cnt <= 0:
+            self.finished = True
+            self.call_back_func()
+            self.done = True
+            self.time_cnt = self.delay_time
+            print("call back finished")
     
-    def finished(self):
+    def first_finished(self):
         if self.done:
             self.done = False
             return True
