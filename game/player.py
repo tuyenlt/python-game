@@ -8,7 +8,7 @@ from game.gun import Gun
 
 class Player(pygame.sprite.Sprite):
     
-    def __init__(self, spwan_pos, sprite_groups, obtacles_sprites, team = "ct", id = "tuyenlt"):
+    def __init__(self, spwan_pos, sprite_groups, obtacles_sprites, create_leg_animation, team = "ct", id = "tuyenlt"):
         super().__init__(sprite_groups)
         #* display init
         self.org_image = get_tile_texture(f'./assets/gfx/player/{team}1.bmp', 0, 64)
@@ -25,6 +25,9 @@ class Player(pygame.sprite.Sprite):
         self.angle = 0
         self.direction = pygame.math.Vector2()
         self.speed = 5
+        
+        # animations
+        self.create_leg_animation = create_leg_animation
     
     def set_selected_weapon(self, weapon):
         self.selected_weapon = weapon
@@ -33,6 +36,8 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         
         #********** movement input
+        if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d] :
+            self.create_leg_animation()
         if keys[pygame.K_w]:
             self.direction.y = -1
         elif keys[pygame.K_s]:
@@ -88,12 +93,14 @@ class Player(pygame.sprite.Sprite):
         
     
     def display(self, surf, offset):
-        offset_pos = self.hitbox.center - offset
+        offset_pos = self.hitbox.center - offset    
         surf.blit(self.image, offset_pos)    
+        # surf.blit(self.leg, offset_pos)    
     
     def handle_pygame_event(self, events : pygame.event.EventType):
         pass                
         
+    
         
     def update(self):
         self.handle_key_input()

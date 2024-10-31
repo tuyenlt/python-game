@@ -42,7 +42,7 @@ def get_animation_from_img(file_path, animation_size, color_key):
     animations_per_row = img_width // animation_size
     animations_per_col = img_height // animation_size
     animations_list = []
-    for x_index in range(animations_per_col):
+    for x_index in range(animations_per_row):
         for y_index in range(animations_per_col):
             animation_rect = pygame.Rect(x_index * animation_size, y_index * animation_size, animation_size, animation_size)
             animations_list.append(img.subsurface(animation_rect))

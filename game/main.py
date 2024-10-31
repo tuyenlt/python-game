@@ -23,6 +23,10 @@ class Game:
             self.map.update_pygame_events(self.events)    
             self.screen.fill((255, 255, 255))
             self.map.run()
+            
+            #draw pointer
+            self.map.pointer_rect.center = pygame.mouse.get_pos()
+            self.screen.blit(self.map.pointer_image, self.map.pointer_rect)  # Vẽ cursor lên màn hình
             pygame.display.update()
             self.clock.tick(FPS)
 
