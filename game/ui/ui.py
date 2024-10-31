@@ -62,26 +62,29 @@ class UI:
         self.display_surface.blit(timer_text_render, timer_rect)
         self.display_surface.blit(timer_symbol, timer_symbol_rect)
 
-    def show_bullet(self, bullet_remain):
-        # hp_text_surf
-        hp_text_render = self.font.render(str(int('abc')), False, (255,232,80))
-        hp_text_rect = hp_text_render.get_rect()
-
-        #hp_symbol
-        hp_symbol_surf = pygame.transform.scale(pygame.image.load('assets/fonts/3401408.webp'), (55,55))
-        hp_symbol_rect = hp_symbol_surf.get_rect()
-        
-        #hp_symbol_pos
-        x = 20  
-        y = self.display_surface.get_size()[1] - 20 
-        hp_symbol_rect.bottomleft = (x, y)
-        
-        hp_text_rect.center = hp_symbol_rect.centerx + hp_symbol_rect.width + 20, hp_symbol_rect.centery
-        
-        
-        self.display_surface.blit(hp_text_render, hp_text_rect)
-        self.display_surface.blit(hp_symbol_surf, hp_symbol_rect)
+    def show_bullet(self, selected_weapon):
+        if hasattr(selected_weapon, 'bullets_remain') :
+            # bullet_text_surf
+            bullet_text_render = self.font.render(str(int(selected_weapon.bullets_remain)), False, (255,232,80))
+            bullet_text_rect = bullet_text_render.get_rect()
+    
+            #bullet_symbol
+            bullet_symbol_surf = pygame.transform.scale(pygame.image.load('assets/fonts/bullet.png'), (55,55))
+            bullet_symbol_rect = bullet_symbol_surf.get_rect()
+            
+            #bullet_symbol_pos
+            x = self.display_surface.get_size()[0] - 20
+            y = self.display_surface.get_size()[1] - 20 
+            bullet_text_rect.bottomright = (x, y)
+            
+            bullet_symbol_rect.center = bullet_text_rect.centerx - bullet_text_rect.width - 20, bullet_text_rect.centery
+            
+            
+            self.display_surface.blit(bullet_text_render, bullet_text_rect)
+            self.display_surface.blit(bullet_symbol_surf, bullet_symbol_rect)
+        else : pass
 
     def display(self, player):
         self.show_hp(player.hp)
         self.show_timer()  
+        self.show_bullet(player.selected_weapon)
