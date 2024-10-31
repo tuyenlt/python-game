@@ -3,6 +3,7 @@ import random, math
 from game.player import Player
 from game.settings import *
 from game.ultis.resource_loader import get_sprite_from_sheet
+from game.weapon import Gun
 
 
 class OnlinePlayer(Player):
@@ -23,12 +24,27 @@ class OnlinePlayer(Player):
         self.hitbox.center = data['pos']
         self.hp = data['hp']
         self.angle = data['angle']
+        if self.dead != data['dead']:
+            if data['dead'] == False:
+                Gun.sprite_groups.add(self.selected_weapon)
+            else:
+                Gun.sprite_groups.remove(self.selected_weapon)
+            self.dead = data['dead']
+        
         if self.selected_weapon_index != data['wp_index']:
             self.set_selected_weapon(self.weapons_list[data['wp_index']])
             self.selected_weapon_index = data['wp_index']
+            
         if self.sprite_index != data['sp_index']:
             self.sprite_index = data['sp_index']
-            self.org_image =  self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, self.sprite_index)
+            if self.sprite_index == -1:
+                self.org_image = self.dead_image
+                self.image = self.org_image
+                self.rect = self.image.get_rect()
+                self.rect.center = self.hitbox.center
+            else:
+                self.org_image =  self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, self.sprite_index)
         
     def update(self):
-        self.handle_angle()       
+        if not self.dead:
+            self.handle_angle()       
