@@ -1,4 +1,4 @@
-import pygame, os
+import pygame, random
 from game.bullet import Bullet, LineBullet
 from game.ultis.resource_loader import import_csv_layout, get_tile_texture, get_animation_from_img
 from game.settings import *
@@ -28,7 +28,6 @@ class Map:
         self.pygame_events = None
         self.events = InputEvent()
         # self.firing_sound = pygame.mixer.Sound('./assets/sounds/ak47.wav')
-        LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
         
         #pointer 
         self.pointer_image = get_animation_from_img('assets/images/pointer.bmp', 46, (255, 0, 255))[0]
@@ -38,7 +37,8 @@ class Map:
         self.ui = UI()
     def create_map(self):
         layouts = {
-            'boundary': import_csv_layout('./assets/maps/dust2/dust2.csv',range(5,30))
+            'boundary': import_csv_layout('./assets/maps/dust2/dust2.csv',range(5,30)),
+            'spawn' : import_csv_layout('./assets/maps/dust2/dust2.csv', [47, 48])
         }
         for row_index, row in enumerate(layouts['boundary']):
             for col_index, val in enumerate(row):
@@ -46,11 +46,32 @@ class Map:
                 y = row_index * TILE_SIZE
                 if val != -1:
                     Tile((x, y),[self.visible_sprites, self.obstacles_sprites], get_tile_texture('./assets/maps/dust2/dust2_tiles.png', val, TILE_SIZE))                    
-        id = "tuyenlt"
+                    
+        self.t_spawn = []
+        self.ct_spawn = []
+        
+        for row_index, row in enumerate(layouts['spawn']):
+            for col_index, val in enumerate(row):
+                x = col_index * TILE_SIZE
+                y = row_index * TILE_SIZE
+                if val == 47:
+                    self.t_spawn.append((x,y))
+                if val == 48:
+                    self.ct_spawn.append((x,y))
+                    
+        
+        # id = "tuyenlt"
+        # team = "t"
         id = input()
-        self.local_player = Player((1300, 1200),[self.visible_sprites, self.totals_player], self.obstacles_sprites,"ct", id)
+        team = input()
+        if team == "ct":
+            spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
+        if team == "t":
+            spawn_pos = self.t_spawn[random.randint(0,self.t_spawn.__len__()-1)]
+            
+        self.local_player = Player(spawn_pos,[self.visible_sprites, self.totals_player], self.obstacles_sprites,team, id)
         self.player_id.append(id)
-        self.network.player_init(id)
+        self.network.player_init(id, team)
         # self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
         self.visible_sprites.set_local_player(self.local_player)
         
@@ -75,12 +96,14 @@ class Map:
             'flag' : 2,
             'id' : self.local_player.id,
             'player' : {
+                'team' : self.local_player.team,
                 'pos' : self.local_player.hitbox.center,
                 'hp' : self.local_player.hp,
                 'angle' : self.local_player.angle,
                 'online_bullets' : [],
                 'local_bullets' : self.bullets_data,
-                'weapon' : self.local_player.selected_weapon.name
+                'wp_index' : self.local_player.selected_weapon_index,
+                'sp_index' : self.local_player.sprite_index
             },
         }
         self.network.fetch_data()
@@ -89,22 +112,30 @@ class Map:
         for key in self.network.server_data['player'].keys():
             if key not in self.player_id and key != 'bullets':
                 self.player_id.append(key)
-                new_player = OnlinePlayer(self.network.server_data['player'][key]['pos'], [self.visible_sprites, self.totals_player], self.obstacles_sprites, "ct", key)
-                new_player.set_selected_weapon(Gun(new_player ,self.network.server_data['player'][key]['weapon']))
+                new_player = OnlinePlayer(self.network.server_data['player'][key]['pos'], [self.visible_sprites, self.totals_player],
+                                             self.obstacles_sprites, self.network.server_data['player'][key]['team'] , key)
+                # new_player.set_selected_weapon(Gun(new_player ,self.network.server_data['player'][key]['weapon']))
                 self.online_player.add(new_player)
                 print(new_player.selected_weapon)
                 
         for player in self.online_player:
             player.load_data(self.network.server_data['player'][player.id])
         
-        for (start_pos, end_pos, angle, id) in self.network.server_data['player'][self.local_player.id]['online_bullets']:
+        for (start_pos, end_pos, angle, dmg, id) in self.network.server_data['player'][self.local_player.id]['online_bullets']:
             self.bullets.append(LineBullet(start_pos, angle, 
-                                               id, 20, False))
+                                               id, dmg, True))
             
-        for player in self.totals_player:
-            if player.hp <= 0:
-                player.kill()
-        
+        if  (    self.network.server_data['player'][self.local_player.id]['dead'] == True
+            and self.local_player.dead == False):
+            if self.local_player.respawn_hook.finished():
+                self.network.respawn_request(self.local_player.id, (100, 100))
+                return
+            self.local_player.dead = True
+            if self.local_player.team == "ct":
+                spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
+            if self.local_player.team == "t":
+                spawn_pos = self.t_spawn[random.randint(0,self.t_spawn.__len__()-1)]
+            self.local_player.respawn_pos = spawn_pos
                      
     def run(self, mouse_clicking = False):
         self.event_handle()

@@ -5,6 +5,7 @@ import json
 from game.settings import *
 from game.ultis.resource_loader import *
 from game.weapon import Gun, Knife
+from game.ultis.func import TimerFunc
 
 class Player(pygame.sprite.Sprite):
     
@@ -15,6 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.org_image = get_tile_texture(f'./assets/gfx/player/{team}1.bmp', 0, 64)
         self.image = self.org_image
         self.obtacles_sprites = obtacles_sprites
+        self.sprite_index = 0
         self.rect = self.image.get_rect(topleft = spwan_pos)
         self.hitbox = self.rect
         self.team = team
@@ -34,8 +36,10 @@ class Player(pygame.sprite.Sprite):
         self.slash_time = 0.4
         self.slash_time_cnt = 0.4
         
-        #animation
-        # self.create_leg_animation = create_leg_animation
+        self.dead = False
+        self.respawn_pos = (1000, 1000)
+        self.respawn_hook = TimerFunc(2, self.respawn)
+    
     def weapons_init(self):
         self.weapons_list = [None] * 6
         if self.team == 'ct':
@@ -48,6 +52,7 @@ class Player(pygame.sprite.Sprite):
         Gun.sprite_groups.remove(self.weapons_list[2])
         Gun.sprite_groups.remove(self.weapons_list[3])
         self.selected_weapon = self.weapons_list[1]
+        self.selected_weapon_index = 1
         
     
     def set_selected_weapon(self, weapon):
@@ -62,7 +67,7 @@ class Player(pygame.sprite.Sprite):
         
         #********** movement input
         # if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d] :
-        #     self.create_leg_animation()
+            # self.create_leg_animation()
         if keys[pygame.K_w]:
             self.direction.y = -1
         elif keys[pygame.K_s]:
@@ -87,12 +92,21 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_1]:
             self.set_selected_weapon(self.weapons_list[1])
             self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
+            self.selected_weapon_index = 1
+            self.sprite_index = 0
+            
         if keys[pygame.K_2]:
             self.set_selected_weapon(self.weapons_list[2])
             self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 4)
+            self.selected_weapon_index = 2
+            self.sprite_index = 4
+            
         if keys[pygame.K_3]:
             self.set_selected_weapon(self.weapons_list[3])
             self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 2)
+            self.selected_weapon_index = 3
+            self.sprite_index = 2
+        
 
     def handle_collision(self, direction):
         if direction == 'horizontal':
@@ -149,10 +163,21 @@ class Player(pygame.sprite.Sprite):
             self.slash_time_cnt = self.slash_time
             self.onslash = False
         self.slash_time_cnt -= 1/FPS
+    
+    def load_server_data(self, data):
+        self.hp = data['hp']
+        self.dead = data['dead']
+    
+    def respawn(self):
+        self.rect.topleft = self.respawn_pos
+        self.hitbox.center = self.rect.center
+        self.hp = 100
+        self.dead = False
             
     def update(self):
         if self.onslash:
             self.knife_slash_animation()
+        self.respawn_hook.count_down(1/FPS, self.dead)
         self.handle_key_input()
         self.handle_movement()
         self.handle_angle()

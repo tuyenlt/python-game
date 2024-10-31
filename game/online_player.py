@@ -1,6 +1,8 @@
 import pygame
 import random, math
 from game.player import Player
+from game.settings import *
+from game.ultis.resource_loader import get_sprite_from_sheet
 
 
 class OnlinePlayer(Player):
@@ -9,7 +11,7 @@ class OnlinePlayer(Player):
         super().__init__(spwan_pos, sprite_groups, obtacles_sprites, team , id)
         self.speed = 5
         self.time = 0
-    
+        
     def handle_angle(self):
         self.image = pygame.transform.rotate(self.org_image, -self.angle)
         self.rect = self.image.get_rect()
@@ -21,14 +23,12 @@ class OnlinePlayer(Player):
         self.hitbox.center = data['pos']
         self.hp = data['hp']
         self.angle = data['angle']
-    
+        if self.selected_weapon_index != data['wp_index']:
+            self.set_selected_weapon(self.weapons_list[data['wp_index']])
+            self.selected_weapon_index = data['wp_index']
+        if self.sprite_index != data['sp_index']:
+            self.sprite_index = data['sp_index']
+            self.org_image =  self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, self.sprite_index)
+        
     def update(self):
-        self.handle_angle()
-        # update from the server
-        # self.handle_movement()
-        # self.time += 1
-        # if self.time % 100 == 0:
-        #     self.direction.x = (random.randint(0,10) - 5) / 10 
-        #     self.direction.y = (random.randint(0,10) - 5) / 10
-        # if self.time % 20 == 0:
-        pass    
+        self.handle_angle()       
