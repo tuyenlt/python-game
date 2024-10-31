@@ -23,7 +23,7 @@ class Map:
         self.bullets = []
         self.bullets_data = []
         self.player_id = []
-        self.network = Network()
+        # self.network = Network()
         self.create_map()
         self.pygame_events = None
         self.events = InputEvent()
@@ -60,10 +60,10 @@ class Map:
                     self.ct_spawn.append((x,y))
                     
         
-        # id = "tuyenlt"
-        # team = "t"
-        id = input()
-        team = input()
+        id = "tuyenlt"
+        team = "t"
+        # id = input()
+        # team = input()
         if team == "ct":
             spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
         if team == "t":
@@ -71,7 +71,7 @@ class Map:
             
         self.local_player = Player(spawn_pos,[self.visible_sprites, self.totals_player], self.obstacles_sprites,team, id)
         self.player_id.append(id)
-        self.network.player_init(id, team)
+        # self.network.player_init(id, team)
         # self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
         self.visible_sprites.set_local_player(self.local_player)
         
@@ -124,6 +124,7 @@ class Map:
         for (start_pos, end_pos, angle, dmg, id) in self.network.server_data['player'][self.local_player.id]['online_bullets']:
             self.bullets.append(LineBullet(start_pos, angle, 
                                                id, dmg, True))
+        self.local_player.load_server_data(self.network.server_data['player'][self.local_player.id])
             
         if  (    self.network.server_data['player'][self.local_player.id]['dead'] == True
             and self.local_player.dead == False):
@@ -139,11 +140,10 @@ class Map:
                      
     def run(self, mouse_clicking = False):
         self.event_handle()
-        self.network_update()
+        # self.network_update()
         self.visible_sprites.update()
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)
-        
         
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
