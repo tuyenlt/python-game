@@ -5,7 +5,7 @@ import json
 from game.settings import *
 from game.ultis.resource_loader import *
 from game.weapon import Gun, Knife
-from game.ultis.func import TimerFunc
+from game.ultis.func import TimerCallback
 
 class Player(pygame.sprite.Sprite):
     
@@ -37,8 +37,9 @@ class Player(pygame.sprite.Sprite):
         self.slash_time_cnt = 0.4
         
         self.dead = False
-        self.respawn_pos = (1000, 1000)
-        self.respawn_hook = TimerFunc(2, self.respawn)
+        self.respawn_pos = spwan_pos
+        self.respawn_call_back = None
+        self.respawn_hook = TimerCallback(2, self.respawn)
     
     def weapons_init(self):
         self.weapons_list = [None] * 6
@@ -166,18 +167,23 @@ class Player(pygame.sprite.Sprite):
     
     def load_server_data(self, data):
         self.hp = data['hp']
-        self.dead = data['dead']
+        if self.dead == False:
+            self.dead = data['dead']
+    
     
     def respawn(self):
+        print("respawn call")
         self.rect.topleft = self.respawn_pos
         self.hitbox.center = self.rect.center
         self.hp = 100
         self.dead = False
+        self.respawn_call_back()
             
     def update(self):
         if self.onslash:
             self.knife_slash_animation()
-        self.respawn_hook.count_down(1/FPS, self.dead)
+        if self.dead: 
+            self.respawn_hook.count_down(1/FPS)
         self.handle_key_input()
         self.handle_movement()
         self.handle_angle()
