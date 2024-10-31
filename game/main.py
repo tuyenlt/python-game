@@ -10,7 +10,7 @@ class Game:
         pygame.init()
         pygame.mixer.init()
         self.screen = pygame.display.set_mode((SRC_WIDTH, SRC_HEIGHT))
-        pygame.display.set_caption("2D Shotting")
+        pygame.display.set_caption("2D Shootting")
         self.clock = pygame.time.Clock()
         self.map = Map()
         self.events = NOEVENT
