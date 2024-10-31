@@ -9,7 +9,7 @@ from game.network import Network
 from game.weapon import Gun, Knife
 from game.input_event import InputEvent
 from game.leg import Leg
-
+from game.ui.ui import UI
 class Map:
     def __init__(self):
         self.display_surface =  pygame.display.get_surface() 
@@ -33,6 +33,8 @@ class Map:
         self.pointer_image = get_animation_from_img('assets/images/pointer.bmp', 46, (255, 0, 255))[0]
         self.pointer_rect = self.pointer_image.get_rect()
         
+        # UI
+        self.ui = UI()
     def create_map(self):
         layouts = {
             'boundary': import_csv_layout('./assets/maps/dust2/dust2.csv',range(5,30)),
@@ -140,6 +142,7 @@ class Map:
         self.network_update()
         self.visible_sprites.update()
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
+        self.ui.display(self.local_player)
         
         
 class CameraGroup(pygame.sprite.Group):
