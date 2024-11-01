@@ -82,8 +82,7 @@ class UI:
             
             self.display_surface.blit(bullet_text_render, bullet_text_rect)
             self.display_surface.blit(bullet_symbol_surf, bullet_symbol_rect)
-        else : pass
-
+    
     def display(self, player):
         self.show_hp(player.hp)
         self.show_timer()  

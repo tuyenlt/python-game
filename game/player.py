@@ -7,9 +7,10 @@ from game.ultis.resource_loader import *
 from game.weapon import Gun, Knife
 from game.ultis.func import TimerCallback
 
+
 class Player(pygame.sprite.Sprite):
     
-    def __init__(self, spwan_pos, sprite_groups, obtacles_sprites, team = "ct", id = "tuyenlt"):
+    def __init__(self, spawn_pos, sprite_groups, obtacles_sprites, team = "ct", id = "tuyenlt"):
         super().__init__(sprite_groups)
         self.sprite_groups = sprite_groups[0]
         #* display init
@@ -20,7 +21,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.org_image
         self.obtacles_sprites = obtacles_sprites
         self.sprite_index = 0
-        self.rect = self.image.get_rect(topleft = spwan_pos)
+        self.rect = self.image.get_rect(topleft = spawn_pos)
         self.hitbox = self.rect
         self.team = team
         self.id = id
@@ -40,10 +41,12 @@ class Player(pygame.sprite.Sprite):
         self.slash_time_cnt = 0.4
         
         self.dead = False
-        self.respawn_pos = spwan_pos
+        self.respawn_pos = spawn_pos
         self.respawn_call_back = None
         self.respawn_hook = TimerCallback(2, self.respawn)
-    
+
+
+        
     def weapons_init(self):
         self.weapons_list = [None] * 6
         if self.team == 'ct':
@@ -70,8 +73,6 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         
         #********** movement input
-        # if keys[pygame.K_w] or keys[pygame.K_a] or keys[pygame.K_s] or keys[pygame.K_d] :
-            # self.create_leg_animation()
         if keys[pygame.K_w]:
             self.direction.y = -1
         elif keys[pygame.K_s]:
@@ -156,7 +157,6 @@ class Player(pygame.sprite.Sprite):
     def display(self, surf, offset):
         offset_pos = self.hitbox.center - offset    
         surf.blit(self.image, offset_pos)    
-        # surf.blit(self.leg, offset_pos)    
     
     def knife_slash_animation(self): 
         if self.slash_time_cnt >= self.slash_time / 2:
