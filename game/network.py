@@ -26,11 +26,10 @@ class Network:
         }
         self.server_data = {}
 
-    def respawn_request(self, player_id, pos):
+    def respawn_request(self, player_id):
         respawn_data = {
             'flag' : 3,
             'id' : player_id,
-            'pos': pos
         }
         self.client.send(json.dumps(respawn_data).encode())
         

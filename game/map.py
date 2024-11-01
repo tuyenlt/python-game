@@ -7,10 +7,11 @@ from game.player import Player
 from game.online_player import OnlinePlayer
 from game.tile import Tile
 from game.network import Network
-from game.weapon import Gun, Knife
+from game.weapon import Gun, Knife, Weapon
 from game.input_event import InputEvent
 from game.leg import Leg
 from game.ui.ui import UI
+from game.network_thread import NetworkThread
 class Map:
     def __init__(self):
         self.display_surface =  pygame.display.get_surface() 
@@ -19,8 +20,7 @@ class Map:
         self.online_player = pygame.sprite.Group()
         self.totals_player = pygame.sprite.Group()
         LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
-        Gun.set_sprite_groups(self.visible_sprites)
-        Knife.set_sprite_groups(self.visible_sprites)
+        Weapon.set_sprite_groups(self.visible_sprites, self.obstacles_sprites)
         self.bullets = []
         self.bullets_data = []
         self.player_id = []
@@ -75,7 +75,7 @@ class Map:
         self.local_player = Player(spawn_pos,[self.visible_sprites, self.totals_player], self.obstacles_sprites,team, id)
         self.player_id.append(id)
         self.network.player_init(id, team)
-        self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id, (100, 100))
+        self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id)
         self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
         self.visible_sprites.set_local_player(self.local_player)
         
@@ -109,7 +109,9 @@ class Map:
                 'online_bullets' : [],
                 'local_bullets' : self.bullets_data,
                 'wp_index' : self.local_player.selected_weapon_index,
-                'sp_index' : self.local_player.sprite_index
+                'sp_index' : self.local_player.sprite_index,
+                'knife_sl': [],
+                'nade':[],
             },
         }
         self.network.fetch_data()
