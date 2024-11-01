@@ -3,6 +3,7 @@ import math
 from game.bullet import LineBullet
 from game.settings import *
 import random
+from game.ultis.func  import TimerCallback
 
 # class Weapon(pygame.sprite.Sprite):
 #     sprite_groups = None
@@ -41,6 +42,7 @@ class Gun(pygame.sprite.Sprite):
         self.fire_cooldown = self.fire_rate
         self.reload_time_cnt = self.reload_time
         self.recoil_cnt = 0
+        self.reloading = False
     
     def gun_attr_init(self):
         if self.name == "ak47":            
@@ -97,7 +99,7 @@ class Gun(pygame.sprite.Sprite):
         self.rect.centery = self.owner.hitbox.centery + self.offset_y 
         
     def fire(self, bullets_list = [], bullets_data = []):
-        if self.bullets_remain == 0:
+        if self.bullets_remain == 0 or self.reloading:
             return
         if self.type == "auto":
             if self.fire_cooldown > 0:
@@ -123,19 +125,24 @@ class Gun(pygame.sprite.Sprite):
         bullets_list.append(new_bullet)
         bullets_data.append(new_bullet.to_object_value())
     
-    
+    def reset(self):
+        self.bullets_remain = self.max_bullets
+
+    def reload(self):
+        self.reloading = True
             
     def update(self):
         self.fire_cooldown -= 1 / FPS
-        if self.bullets_remain == 0:
+        if self.bullets_remain == 0 or self.reloading:
             if self.reload_time_cnt == self.reload_time:
                 self.reload_start_sound.play()
             if abs(int(self.reload_time_cnt * 100) - 150) <= 100 / FPS:
                 self.reload_end_sound.play()
             self.reload_time_cnt -= 1 / FPS
-        if self.reload_time_cnt <= 0:
-            self.reload_time_cnt = self.reload_time
-            self.bullets_remain = self.max_bullets
+            if self.reload_time_cnt <= 0:
+                self.reload_time_cnt = self.reload_time
+                self.bullets_remain = self.max_bullets
+                self.reloading = False
             
 
 

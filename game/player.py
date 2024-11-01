@@ -93,7 +93,7 @@ class Player(pygame.sprite.Sprite):
             self.speed = 5
         #********** end movement input
 
-        #********** weapon change input
+        #********** weapon input
         if keys[pygame.K_1]:
             self.set_selected_weapon(self.weapons_list[1])
             self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
@@ -111,6 +111,10 @@ class Player(pygame.sprite.Sprite):
             self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 2)
             self.selected_weapon_index = 3
             self.sprite_index = 2
+            
+        if keys[pygame.K_r]:
+            if self.selected_weapon_index in [1,2]:
+                self.selected_weapon.reload()
         
 
     def handle_collision(self, direction):
@@ -144,7 +148,7 @@ class Player(pygame.sprite.Sprite):
             offset_x = pygame.mouse.get_pos()[0] - CENTER_X
             offset_y = pygame.mouse.get_pos()[1] - CENTER_Y
             if offset_y == 0:
-                self.angle = math.pi / 2 if offset_x > 0 else -math.pi / 2
+                self.angle = -180 if offset_x < 0 else 0
             else:
                 self.angle = math.degrees(math.atan2(offset_y, offset_x))  
         self.image = pygame.transform.rotate(self.org_image, -self.angle)
@@ -184,6 +188,7 @@ class Player(pygame.sprite.Sprite):
         self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
         self.sprite_index = 0
         Gun.sprite_groups.add(self.selected_weapon)
+        self.selected_weapon.reset()
         
     def update(self):
         if self.onslash:
