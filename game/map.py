@@ -11,7 +11,6 @@ from game.weapon import Gun, Knife, Weapon
 from game.input_event import InputEvent
 from game.leg import Leg
 from game.ui.ui import UI
-from game.network_thread import NetworkThread
 class Map:
     def __init__(self):
         self.display_surface =  pygame.display.get_surface() 
