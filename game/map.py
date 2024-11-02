@@ -13,7 +13,7 @@ from game.leg import Leg
 
 from game.ui.ui import UI
 class Map:
-    def __init__(self):
+    def __init__(self, id, team):
         self.display_surface =  pygame.display.get_surface() 
         self.visible_sprites = CameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
@@ -24,23 +24,32 @@ class Map:
         self.bullets = []
         self.bullets_data = []
         self.player_id = []
-        self.network = Network()
-        self.create_map()
+        # self.network = Network()
+        
+        # self.select_team = None
+        self.create_map(id, team)
+        
+        
         self.pygame_events = None
         self.events = InputEvent()
         # self.firing_sound = pygame.mixer.Sound('./assets/sounds/ak47.wav')
+        
+        
         
         #pointer 
         self.pointer_image = get_animation_from_img('assets/images/pointer.bmp', 46, (255, 0, 255))[0]
         self.pointer_rect = self.pointer_image.get_rect()
 
         #leg
-        self.leg = Leg(self.local_player, [self.visible_sprites])
+        # self.leg = Leg(self.local_player, [self.visible_sprites])
         
         # UI
         self.ui = UI()
         
-    def create_map(self):
+    def set_team(self, team):
+        self.select_team = team
+        
+    def create_map(self, id, team):
         layouts = {
             'boundary': import_csv_layout('./assets/maps/dust2/dust2.csv',range(5,30)),
             'spawn' : import_csv_layout('./assets/maps/dust2/dust2.csv', [47, 48])
@@ -65,13 +74,11 @@ class Map:
                     self.ct_spawn.append((x,y))
                     
         
-        id = "tuyenlt"
-        team = "t"
         # id = input()
         # team = input()
         if team == "ct":
             spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
-        if team == "t":
+        elif team == "t":
             spawn_pos = self.t_spawn[random.randint(0,self.t_spawn.__len__()-1)]
             
         self.local_player = Player(spawn_pos,[self.visible_sprites, self.totals_player], self.obstacles_sprites, team, id)
@@ -134,11 +141,11 @@ class Map:
                      
     def run(self, mouse_clicking = False):
         self.event_handle()
-        if hasattr(self.visible_sprites, 'update_leg') :
-            self.visible_sprites.update_leg(self.local_player)
-        else :
-            self.visible_sprites.update()
-        self.network_update()
+        # if hasattr(self.visible_sprites, 'update_leg') :
+        #     self.visible_sprites.update_leg(self.local_player)
+        # else :
+        self.visible_sprites.update()
+        # self.network_update()
 
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)

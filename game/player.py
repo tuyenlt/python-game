@@ -10,7 +10,7 @@ from game.ultis.func import TimerCallback
 
 class Player(pygame.sprite.Sprite):
     
-    def __init__(self, spawn_pos, sprite_groups, obtacles_sprites, team = "ct", id = "tuyenlt"):
+    def __init__(self, spawn_pos, sprite_groups, obtacles_sprites, team, id = "tuyenlt"):
         super().__init__(sprite_groups)
         self.sprite_groups = sprite_groups[0]
         #* display init
