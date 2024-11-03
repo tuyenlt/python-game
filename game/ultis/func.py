@@ -71,7 +71,6 @@ class TimerCallback:
     def count_down(self, amount):
         self.finished = False
         self.time_cnt -= amount
-        print(self.time_cnt)
         if self.time_cnt <= 0:
             self.finished = True
             self.call_back_func()

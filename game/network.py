@@ -1,19 +1,14 @@
 import socket
 import json
 from game.settings import *
-from _thread import start_new_thread
 
 class Network:
     def __init__(self):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Change to UDP
         self.client.settimeout(20)
         self.server = "127.0.0.1"
-        # self.server = "192.168.0.1"
-        # self.server = "192.168.0.1"
-        # self.server = "10.20.165.64"
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.pos = self.connect()
         self.local_data = {
             'flag' : 2,
             'id' : "",
@@ -28,46 +23,48 @@ class Network:
         }
         self.server_data = {}
 
-    def respawn_request(self, player_id, pos):
+    def respawn_request(self, player_id):
         respawn_data = {
             'flag' : 3,
             'id' : player_id,
-            'pos': pos
         }
-        self.client.send(json.dumps(respawn_data).encode())
-        
+        # Send respawn request to the server
+        self.client.sendto(json.dumps(respawn_data).encode(), self.addr)
+
     def player_init(self, player_id, team):
         init_data = {
             'flag' : 1,
             'id' : player_id,
             'team' : team
         }
-        self.client.send(json.dumps(init_data).encode())
-
-    def connect(self):
-        try:
-            self.client.connect(self.addr)
-            print("connected to server")
-        except socket.timeout:
-            print("Connection timed out.")
-        except Exception as e:
-            print(f"Connection failed: {e}")
+        # Send initialization data to the server
+        self.client.sendto(json.dumps(init_data).encode(), self.addr)
 
     def fetch_data(self):
         try:
-            self.client.send(json.dumps(self.local_data).encode())
-            self.server_data = json.loads(self.client.recv(MAX_DATA_SIZE).decode())
+            # Send player data to the server
+            self.client.sendto(json.dumps(self.local_data).encode(), self.addr)
+            
+            # Receive data from the server
+            data, _ = self.client.recvfrom(MAX_DATA_SIZE)
+            self.server_data = json.loads(data.decode())
         except socket.timeout:
             print("Send/receive operation timed out.")
         except socket.error as e:
-            print(f"Socket error: {e}")        
-            
+            print(f"Socket error: {e}")
+
     def listen(self):
-        return self.client.recv(MAX_DATA_SIZE).decode()
+        try:
+            data, _ = self.client.recvfrom(MAX_DATA_SIZE)
+            return data.decode()
+        except socket.timeout:
+            print("Listening operation timed out.")
+        except socket.error as e:
+            print(f"Socket error while listening: {e}")
+            return None
     
     def shut_down(self):
         try:
-            self.client.shutdown(socket.SHUT_RDWR)  # Use SHUT_RDWR for proper shutdown
-            self.client.close()
+            self.client.close()  # For UDP, close the socket directly
         except Exception as e:
             print(f"Error during shutdown: {e}")

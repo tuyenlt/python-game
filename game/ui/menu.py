@@ -86,6 +86,7 @@ class Menu:
                 text_surf = self.font.render(name, True, (255, 255, 255))
                 text_rect = text_surf.get_rect(center=rect.center)
                 self.display_surface.blit(text_surf, text_rect)
+                
     def draw_sub_menu(self):
             
             s = pygame.Surface((self.display_surface.get_width(), self.display_surface.get_height()))

@@ -3,42 +3,60 @@ import math
 from game.bullet import LineBullet
 from game.settings import *
 import random
-from game.ultis.func  import TimerCallback
+from game.ultis.func  import TimerCallback, distance
+from game.ultis.resource_loader import get_sprite_from_sheet
 
-# class Weapon(pygame.sprite.Sprite):
-#     sprite_groups = None
-#     def __init__(self, owner, name=""):
-#         super().__init__(self.sprite_groups)
-#         self.name = name
-#         self.owner = owner
-    
-
-
-class Gun(pygame.sprite.Sprite):
-    start_time = pygame.time.get_ticks()
+class Weapon(pygame.sprite.Sprite):
     sprite_groups = None
-    
+    obtacles = None
     @classmethod
-    def set_sprite_groups(cls, sprite_groups): #! call this func before create any object
+    def set_sprite_groups(cls, sprite_groups, obtacles): #! call this func before create any object
         cls.sprite_groups = sprite_groups
+        cls.obtacles = obtacles
     
-    def __init__(self, owner , name = "ak47"):
+    def __init__(self, owner, name="", sound_init = True):
         super().__init__(self.sprite_groups)
         self.name = name
         self.owner = owner
-        self.gun_attr_init()
-        
-        self.fire_sound = pygame.mixer.Sound(f"./assets/sounds/weapons/{self.name}.wav")
-        self.fire_sound.set_volume(10)
+        self.type = "single"
+        if sound_init:
+            self.fire_sound = pygame.mixer.Sound(f"./assets/sounds/weapons/{self.name}.wav")
+            self.fire_sound.set_volume(10)
         self.org_image = pygame.image.load(f"./assets/gfx/weapons/{self.name}.bmp").convert_alpha()
-        self.reload_start_sound = pygame.mixer.Sound("./assets/sounds/weapons/reloadstart.wav")
-        self.reload_end_sound = pygame.mixer.Sound("./assets/sounds/weapons/reloadend.wav")
-        
         self.image = self.org_image
         self.rect = self.image.get_rect()
-        self.offset_x = math.cos(10 * (2 * math.pi / 360)) * 20
-        self.offset_y = math.sin(10 * (2 * math.pi / 360)) * 20
+        self.offset_x = 0
+        self.offset_y = 0
         self.angle = 0
+        self.dmg = 0
+        self.pos_buffer = 32
+        
+    def rotate(self, angle):
+        self.angle = -angle
+        self.offset_x = math.cos(self.angle * (2 * math.pi / 360)) * self.pos_buffer
+        self.offset_y = math.sin(self.angle * (2 * math.pi / 360)) * self.pos_buffer
+        self.image = pygame.transform.rotate(self.org_image, angle)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = self.owner.hitbox.centerx + self.offset_x
+        self.rect.centery = self.owner.hitbox.centery + self.offset_y 
+        
+    def fire(self, x, y):
+        pass
+
+    def stop(self):
+        pass
+    
+    def update():
+        pass
+    
+    
+
+class Gun(Weapon):
+    def __init__(self, owner , name = "ak47"):
+        super().__init__(owner, name)
+        self.gun_attr_init()
+        self.reload_start_sound = pygame.mixer.Sound("./assets/sounds/weapons/reloadstart.wav")
+        self.reload_end_sound = pygame.mixer.Sound("./assets/sounds/weapons/reloadend.wav")
         self.fire_cooldown = self.fire_rate
         self.reload_time_cnt = self.reload_time
         self.recoil_cnt = 0
@@ -88,15 +106,6 @@ class Gun(pygame.sprite.Sprite):
             self.reload_time = 1
             self.dmg = 10
         self.bullets_remain = self.max_bullets
-    
-    def rotate(self, angle):
-        self.angle = -angle
-        self.offset_x = math.cos(self.angle * (2 * math.pi / 360)) * 32
-        self.offset_y = math.sin(self.angle * (2 * math.pi / 360)) * 32
-        self.image = pygame.transform.rotate(self.org_image, angle)
-        self.rect = self.image.get_rect()
-        self.rect.centerx = self.owner.hitbox.centerx + self.offset_x
-        self.rect.centery = self.owner.hitbox.centery + self.offset_y 
         
     def fire(self, bullets_list = [], bullets_data = []):
         if self.bullets_remain == 0 or self.reloading:
@@ -146,47 +155,105 @@ class Gun(pygame.sprite.Sprite):
             
 
 
-class Knife(pygame.sprite.Sprite):
-    sprite_groups = None
-    
-    @classmethod
-    def set_sprite_groups(cls, sprite_groups): #! call this func before create any object
-        cls.sprite_groups = sprite_groups
-    
+class Knife(Weapon):
     def __init__(self, owner):
-        super().__init__(self.sprite_groups)
-        self.name = "knife"
+        super().__init__(owner, 'knife')
         self.type = "auto"
-        self.owner = owner
-        self.slash_sound = pygame.mixer.Sound(f"./assets/sounds/weapons/{self.name}_hit.wav")
-        self.org_image = pygame.image.load(f"./assets/gfx/weapons/{self.name}.bmp").convert_alpha()
-        self.image = self.org_image
-        self.rect = self.image.get_rect()
-        self.offset_x = math.cos(10 * (2 * math.pi / 360)) * 20
-        self.offset_y = math.sin(10 * (2 * math.pi / 360)) * 20
-        self.angle = 0
         self.slash_cooldown = 0
         self.slash_delay = 0.4
+        self.net_data = []
     
     def fire(self, x, y):
         if self.slash_cooldown > 0:
             return
+        (x, y) = self.rect.topleft
+        self.net_data = [x, y, self.rect.width, self.rect.height, self.owner.id]
         self.slash_cooldown = 0.4
-        self.slash_sound.play()
+        self.fire_sound.play()
         self.owner.onslash = True
-        self.owner.knife_slash_animation()
-        print("xien chet cu may di")
-    
-    def rotate(self, angle):
-        self.angle = -angle
-        self.offset_x = math.cos(self.angle * (2 * math.pi / 360)) * 32
-        self.offset_y = math.sin(self.angle * (2 * math.pi / 360)) * 32
-        self.image = pygame.transform.rotate(self.org_image, angle)
-        self.rect = self.image.get_rect()
-        self.rect.centerx = self.owner.hitbox.centerx + self.offset_x
-        self.rect.centery = self.owner.hitbox.centery + self.offset_y     
+        self.owner.knife_slash_animation()  
         
     def update(self, *args, **kwargs):
-        self.slash_cooldown -= 1 / FPS
+        if self.slash_cooldown > 0:
+            self.slash_cooldown -= 1 / FPS
+
+
+
+
+class Grenade(Weapon):
+    def __init__(self, owner, name = "he"):
+        super().__init__(owner, name, False)
+        self.explode_sound = pygame.mixer.Sound("./assets/sounds/weapons/explode1.wav")
+        self.bullets_remain = 3
+        self.throw_speed = 10
+        self.grenade_init()
+        self.pos_buffer = 22
+        self.onthrow = False
+        self.throw_hook = TimerCallback(2.2, self.finish_throw)
+        self.hitbox = self.rect.inflate((-25,-25))
+        # self.explode_img_sheet = pygame.image.load("./assets/gfx/explosion.png")
+        self.explode_img_sheet = pygame.transform.scale(pygame.image.load("./assets/gfx/explosion.png"),(640,640))
+        self.on_explode = False
+        self.explode_img_index = 0
+    
+    def grenade_init(self):
+        if self.name == "he":
+            self.dmg = 50
+         
+    def reset(self):
+        self.bullets_remain = 3     
+        self.sprite_groups.add(self)
         
+    def rotate(self, angle):
+        if not self.onthrow:
+            self.image = self.org_image
+            super().rotate(angle)
+    
+    def fire(self, x, y):
+        self.onthrow = True
+        if self.throw_hook.finished and self.bullets_remain > 0:
+            self.bullets_remain -= 1
+            self.offset_x = math.cos(self.angle * (2 * math.pi / 360)) * self.throw_speed
+            self.offset_y = math.sin(self.angle * (2 * math.pi / 360)) * self.throw_speed
+    
+    def finish_throw(self):        
+        self.onthrow = False
+        self.on_explode = False
+        self.explode_img_index = 0
+        if self.bullets_remain == 0:
+            self.owner.switch_to_primary_weapon()
+            self.sprite_groups.remove(self)
+        
+    def update(self):
+        self.hitbox.center = self.rect.center
+        if self.onthrow:
+            self.throw_hook.count_down(1/FPS)               
+            if abs(int(self.throw_hook.time_cnt * 100) - 60 * 2.5) <= 100 / FPS:
+                self.explode_sound.play()
+            if self.throw_hook.time_cnt >= 0.42 * 2.5:
+                self.rect.centerx += self.offset_x
+                self.rect.centery += self.offset_y
+            else:
+                self.image = get_sprite_from_sheet(self.explode_img_sheet, 128, int(self.explode_img_index))
+                self.explode_img_index += 1/2.5
+            
+            for obtacle in sorted(self.obtacles, key = lambda x : distance(self.hitbox.center, x.rect.center)):
+                if obtacle.rect.colliderect(self.hitbox):
+                    dx = self.hitbox.centerx - obtacle.rect.centerx
+                    dy = self.hitbox.centery - obtacle.rect.centery
+                    if abs(dx) > abs(dy):  # Horizontal collision
+                        if dx > 0:
+                            if self.offset_x < 0:
+                                self.offset_x = -self.offset_x
+                        else:
+                            if self.offset_x > 0:
+                                self.offset_x = -self.offset_x
+                    else:  
+                        if dy > 0:
+                            if self.offset_y < 0:
+                                self.offset_y = -self.offset_y
+                        else:
+                            if self.offset_y > 0:
+                                self.offset_y = -self.offset_y
+                    break
         

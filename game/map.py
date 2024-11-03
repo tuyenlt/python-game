@@ -7,7 +7,7 @@ from game.player import Player
 from game.online_player import OnlinePlayer
 from game.tile import Tile
 from game.network import Network
-from game.weapon import Gun, Knife
+from game.weapon import Gun, Knife, Weapon
 from game.input_event import InputEvent
 from game.leg import Leg
 
@@ -20,12 +20,11 @@ class Map:
         self.online_player = pygame.sprite.Group()
         self.totals_player = pygame.sprite.Group()
         LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
-        Gun.set_sprite_groups(self.visible_sprites)
-        Knife.set_sprite_groups(self.visible_sprites)
+        Weapon.set_sprite_groups(self.visible_sprites, self.obstacles_sprites)
         self.bullets = []
         self.bullets_data = []
         self.player_id = []
-        # self.network = Network()
+        self.network = Network()
         
         # self.select_team = None
         self.create_map(id, team)
@@ -74,9 +73,6 @@ class Map:
                 if val == 48:
                     self.ct_spawn.append((x,y))
                     
-        
-        # id = input()
-        # team = input()
         if team == "ct":
             spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
         elif team == "t":
@@ -84,8 +80,8 @@ class Map:
             
         self.local_player = Player(spawn_pos,[self.visible_sprites, self.totals_player], self.obstacles_sprites, team, id)
         self.player_id.append(id)
-        # self.network.player_init(id, team)
-        # self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id, (100, 100))
+        self.network.player_init(id, team)
+        self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id)
         self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
         self.visible_sprites.set_local_player(self.local_player)
         
@@ -116,7 +112,9 @@ class Map:
                 'online_bullets' : [],
                 'local_bullets' : self.bullets_data,
                 'wp_index' : self.local_player.selected_weapon_index,
-                'sp_index' : self.local_player.sprite_index
+                'sp_index' : self.local_player.sprite_index,
+                'knife_sl': [],
+                'nade':[],
             },
         }
         self.network.fetch_data()
@@ -144,7 +142,7 @@ class Map:
         #     self.visible_sprites.update_leg(self.local_player)
         # else :
         self.visible_sprites.update()
-        # self.network_update()
+        self.network_update()
 
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)

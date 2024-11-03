@@ -33,11 +33,8 @@ class Game:
                 
             if not self.map:
                 self.screen.fill((190,158,108))
-            else :
+            else:
                 self.screen.fill((255,255,255))
-            
-            self.menu.draw()
-            
             if self.map:
                 self.map.update_pygame_events(self.events)    
                 self.map.run()

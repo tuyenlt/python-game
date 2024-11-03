@@ -4,7 +4,7 @@ import os
 import json
 from game.settings import *
 from game.ultis.resource_loader import *
-from game.weapon import Gun, Knife
+from game.weapon import Gun, Knife, Grenade
 from game.ultis.func import TimerCallback
 
 
@@ -56,8 +56,10 @@ class Player(pygame.sprite.Sprite):
             self.weapons_list[1] = Gun( owner=self, name="ak47")
             self.weapons_list[2] = Gun( owner=self, name="glock18")
         self.weapons_list[3] = Knife( owner= self)
+        self.weapons_list[4] = Grenade( owner= self, name="he")
         Gun.sprite_groups.remove(self.weapons_list[2])
         Gun.sprite_groups.remove(self.weapons_list[3])
+        Gun.sprite_groups.remove(self.weapons_list[4])
         self.selected_weapon = self.weapons_list[1]
         self.selected_weapon_index = 1
         
@@ -112,11 +114,23 @@ class Player(pygame.sprite.Sprite):
             self.selected_weapon_index = 3
             self.sprite_index = 2
             
+        if keys[pygame.K_4]:
+            if self.weapons_list[4].bullets_remain > 0:
+                self.set_selected_weapon(self.weapons_list[4])
+                self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 2)
+                self.selected_weapon_index = 4
+                self.sprite_index = 2
+            
         if keys[pygame.K_r]:
             if self.selected_weapon_index in [1,2]:
                 self.selected_weapon.reload()
         
-
+    def switch_to_primary_weapon(self):
+        self.set_selected_weapon(self.weapons_list[1])
+        self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
+        self.selected_weapon_index = 1
+        self.sprite_index = 0
+    
     def handle_collision(self, direction):
         if direction == 'horizontal':
             for sprite in self.obtacles_sprites:
@@ -209,11 +223,4 @@ class Player(pygame.sprite.Sprite):
             self.handle_movement()
             self.handle_angle()
     
-    def to_json_string(self):
-        data = {
-            'pos' : self.rect.topleft,
-            'hp' : self.hp,
-            'angle': self.angle,
-        }
-        
         
