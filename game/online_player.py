@@ -31,6 +31,11 @@ class OnlinePlayer(Player):
                 Gun.sprite_groups.remove(self.selected_weapon)
             self.dead = data['dead']
         
+        if data['firing'] == True:
+            print("boom boom")
+            self.fire()
+            pass
+        
         if self.selected_weapon_index != data['wp_index']:
             self.set_selected_weapon(self.weapons_list[data['wp_index']])
             self.selected_weapon_index = data['wp_index']

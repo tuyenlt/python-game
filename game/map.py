@@ -10,6 +10,7 @@ from game.network import Network
 from game.weapon import Gun, Knife, Weapon
 from game.input_event import InputEvent
 from game.leg import Leg
+from game.ultis.func import distance
 
 from game.ui.ui import UI
 class Map:
@@ -19,19 +20,21 @@ class Map:
         self.obstacles_sprites = pygame.sprite.Group()
         self.online_player = pygame.sprite.Group()
         self.totals_player = pygame.sprite.Group()
-        LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
-        Weapon.set_sprite_groups(self.visible_sprites, self.obstacles_sprites)
-        self.bullets = []
-        self.bullets_data = []
         self.player_id = []
-        # self.network = Network()
+        self.bullets = []
+        self.network = Network()
+        self.mouse_clicking = False
+        self.sound_channel_cnt = 0
+        
+        LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
+        Weapon.init(self.visible_sprites, self.obstacles_sprites)
+        self.create_map(id, team)
+        Gun.init(self.bullets)
         
         # self.select_team = None
-        self.create_map(id, team)
         
         
         self.pygame_events = None
-        self.events = InputEvent()
         # self.firing_sound = pygame.mixer.Sound('./assets/sounds/ak47.wav')
         
         
@@ -39,9 +42,6 @@ class Map:
         #pointer 
         self.pointer_image = get_animation_from_img('assets/images/pointer.bmp', 46, (255, 0, 255))[0]
         self.pointer_rect = self.pointer_image.get_rect()
-
-        #leg
-        # self.leg = Leg(self.local_player, [self.visible_sprites])
         
         # UI
         self.ui = UI()
@@ -76,71 +76,78 @@ class Map:
             spawn_pos = self.t_spawn[random.randint(0,self.t_spawn.__len__()-1)]
             
         self.local_player = Player(spawn_pos,[self.visible_sprites, self.totals_player], self.obstacles_sprites, team, id)
+        self.local_player.sound_channel_init(pygame.mixer.Channel(self.sound_channel_cnt))
+        self.local_player.set_volume(0)
+        self.local_player.weapons_init()
+        self.sound_channel_cnt += 1
         self.player_id.append(id)
-        # self.network.player_init(id, team)
-        # self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id)
-        self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
+        self.network.player_init(id, team)
+        self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id)
         self.visible_sprites.set_local_player(self.local_player)
-        
-                    
-    def update_pygame_events(self, events : list[pygame.event.EventType]):
-        self.events.update_event(events)
-                    
                      
-    def event_handle(self):
-        if self.events.mouse_clicking:
-            if self.local_player.selected_weapon and self.local_player.selected_weapon.type == "auto":
-                self.local_player.selected_weapon.fire(self.bullets, self.bullets_data)       
-                
-        def on_click():
-            if self.local_player.selected_weapon and self.local_player.selected_weapon.type == "single": 
-                self.local_player.selected_weapon.fire(self.bullets, self.bullets_data)
-        self.events.on_click_callback = on_click
+    def event_handle(self, events : list[pygame.event.EventType]):
+        for event in events:
+            if event.type ==  pygame.MOUSEBUTTONDOWN:                
+                if event.button == 1:
+                    if self.local_player.selected_weapon.type == "single":
+                        self.local_player.firing = True
+                    self.mouse_clicking = True
+            if event.type ==  pygame.MOUSEBUTTONUP:                
+                if event.button == 1:
+                    self.mouse_clicking = False
+                    
+        if self.local_player.selected_weapon.type == "auto":
+            self.local_player.firing = self.mouse_clicking
+        if self.local_player.firing:
+            self.local_player.fire()
+
+    def volume_control(self):
+        for player in self.online_player:
+            location_diff = distance(self.local_player.hitbox.center, player.hitbox.center)
+            if location_diff > 2000:
+                player.set_volume(0)
+                continue
+            player.set_volume(1 - (location_diff / 2000))
+            
     
     def network_update(self):
         self.network.local_data = {
             'flag' : 2,
             'id' : self.local_player.id,
-            'player' : {
-                'team' : self.local_player.team,
-                'pos' : self.local_player.hitbox.center,
-                'hp' : self.local_player.hp,
-                'angle' : self.local_player.angle,
-                'online_bullets' : [],
-                'local_bullets' : self.bullets_data,
-                'wp_index' : self.local_player.selected_weapon_index,
-                'sp_index' : self.local_player.sprite_index,
-                'knife_sl': [],
-                'nade':[],
-            },
+            'player' : self.local_player.get_data()
         }
+        # print(self.local_player.firing)
         self.network.fetch_data()
-        self.bullets_data.clear()
+        self.local_player.bullets.clear()
+        self.local_player.knife_sl.clear()
+        self.local_player.explode_nade.clear()
+        self.local_player.firing = False
         
         for key in self.network.server_data['player'].keys():
             if key not in self.player_id and key != 'bullets':
                 self.player_id.append(key)
                 new_player = OnlinePlayer(self.network.server_data['player'][key]['pos'], [self.visible_sprites, self.totals_player],
                                              self.obstacles_sprites, self.network.server_data['player'][key]['team'] , key)
-                # new_player.set_selected_weapon(Gun(new_player ,self.network.server_data['player'][key]['weapon']))
+                new_player.sound_channel_init(pygame.mixer.Channel(self.sound_channel_cnt))
+                new_player.weapons_init()
+                self.sound_channel_cnt += 1
                 self.online_player.add(new_player)
-                print(new_player.selected_weapon)
                 
         for player in self.totals_player:
+            if player.id not in self.network.server_data['player'].keys():
+                player.kill()
+                continue
             player.load_data(self.network.server_data['player'][player.id])
         
-        for (start_pos, end_pos, angle, dmg, id) in self.network.server_data['player'][self.local_player.id]['online_bullets']:
-            self.bullets.append(LineBullet(start_pos, angle, 
-                                               id, dmg, True))
+        for player in self.online_player:
+            if player.firing == True:
+                print("boom boom")
+                player.fire()
                      
     def run(self, mouse_clicking = False):
-        self.event_handle()
-        # if hasattr(self.visible_sprites, 'update_leg') :
-        #     self.visible_sprites.update_leg(self.local_player)
-        # else :
+        self.volume_control()
         self.visible_sprites.update()
-        # self.network_update()
-
+        self.network_update()
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)
                 

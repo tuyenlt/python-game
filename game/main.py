@@ -30,13 +30,12 @@ class Game:
                     self.menu.toggle()
                     
                 self.handle_event(event)
-            if not self.map:
-                self.screen.fill((190,158,108))
-            else:
-                self.screen.fill((255,255,255))
             if self.map:
-                self.map.update_pygame_events(self.events)    
+                self.screen.fill((255,255,255))
+                self.map.event_handle(self.events)    
                 self.map.run()
+            else:
+                self.screen.fill((190,158,108))
             
             #draw pointer
             if self.map:

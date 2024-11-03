@@ -26,7 +26,6 @@ class Player(pygame.sprite.Sprite):
         self.team = team
         self.id = id
         self.hp = 100
-        self.weapons_init()
         
         
         #* attr init
@@ -41,28 +40,37 @@ class Player(pygame.sprite.Sprite):
         self.slash_time_cnt = 0.4
         
         self.dead = False
+        self.firing = False
         self.respawn_pos = spawn_pos
         self.respawn_call_back = None
         self.respawn_hook = TimerCallback(2, self.respawn)
-
+        self.bullets = []
+        self.knife_sl = []
+        self.explode_nade = []
+        self.sound_channel = None
 
         
     def weapons_init(self):
         self.weapons_list = [None] * 6
         if self.team == 'ct':
-            self.weapons_list[1] = Gun( owner=self, name="m4a1")
-            self.weapons_list[2] = Gun( owner=self, name="usp")
+            self.weapons_list[1] = Gun( owner=self, sound_channel= self.sound_channel ,name="m4a1")
+            self.weapons_list[2] = Gun( owner=self, sound_channel= self.sound_channel ,name="usp")
         if self.team == 't':
-            self.weapons_list[1] = Gun( owner=self, name="ak47")
-            self.weapons_list[2] = Gun( owner=self, name="glock18")
-        self.weapons_list[3] = Knife( owner= self)
-        self.weapons_list[4] = Grenade( owner= self, name="he")
+            self.weapons_list[1] = Gun( owner=self, sound_channel= self.sound_channel ,name="ak47")
+            self.weapons_list[2] = Gun( owner=self, sound_channel= self.sound_channel ,name="glock18")
+        self.weapons_list[3] = Knife( owner= self, sound_channel= self.sound_channel)
+        self.weapons_list[4] = Grenade( owner= self,sound_channel= self.sound_channel,name="he")
         Gun.sprite_groups.remove(self.weapons_list[2])
         Gun.sprite_groups.remove(self.weapons_list[3])
         Gun.sprite_groups.remove(self.weapons_list[4])
         self.selected_weapon = self.weapons_list[1]
         self.selected_weapon_index = 1
         
+    def sound_channel_init(self, sound_channel):
+        self.sound_channel = sound_channel
+    
+    def set_volume(self, volume):
+        self.sound_channel.set_volume(volume)
     
     def set_selected_weapon(self, weapon):
         if weapon != self.selected_weapon:
@@ -191,6 +199,9 @@ class Player(pygame.sprite.Sprite):
         if self.dead == False:
             self.dead = data['dead']
     
+    def fire(self):
+        if self.selected_weapon:
+            self.selected_weapon.fire()
     
     def respawn(self):
         print("respawn call")
@@ -202,7 +213,9 @@ class Player(pygame.sprite.Sprite):
         self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
         self.sprite_index = 0
         Gun.sprite_groups.add(self.selected_weapon)
-        self.selected_weapon.reset()
+        for weapon in self.weapons_list:
+            if weapon != None:
+                weapon.reset()
         
     def update(self):
         if self.onslash:
@@ -222,5 +235,26 @@ class Player(pygame.sprite.Sprite):
             self.handle_key_input()
             self.handle_movement()
             self.handle_angle()
+
+    def get_data(self):
+        data = {
+            'team' : self.team,
+            'pos' : self.hitbox.center,
+            'hp' : self.hp,
+            'angle' : self.angle,
+            'wp_index' : self.selected_weapon_index,
+            'sp_index' : self.sprite_index,
+            'bullets' : self.bullets,
+            'knife_sl': self.knife_sl,
+            'nade': self.explode_nade,
+            'firing': self.firing
+        }
+        return data
+        
+    def kill(self):
+        for weapon in self.weapons_list:
+            if weapon != None:
+                weapon.kill()
+        super().kill()        
     
         
