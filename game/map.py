@@ -60,32 +60,14 @@ class Map:
                 y = row_index * TILE_SIZE
                 if val != -1:
                     Tile((x, y),[self.visible_sprites, self.obstacles_sprites])                    
-                    
-        self.t_spawn = []
-        self.ct_spawn = []
-        
-        for row_index, row in enumerate(layouts['spawn']):
-            for col_index, val in enumerate(row):
-                x = col_index * TILE_SIZE
-                y = row_index * TILE_SIZE
-                if val == 47:
-                    self.t_spawn.append((x,y))
-                if val == 48:
-                    self.ct_spawn.append((x,y))
-                    
-        if team == "ct":
-            spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
-        elif team == "t":
-            spawn_pos = self.t_spawn[random.randint(0,self.t_spawn.__len__()-1)]
-            
-        self.local_player = Player(spawn_pos,[self.visible_sprites, self.totals_player], self.obstacles_sprites, team, id)
+           
+        (spawn_x, spawn_y) = self.network.player_init(id, team)
+        self.local_player = Player((spawn_x, spawn_y),[self.visible_sprites, self.totals_player], self.obstacles_sprites, team, id)
         self.local_player.sound_channel_init(pygame.mixer.Channel(self.sound_channel_cnt))
-        self.local_player.set_volume(0)
+        self.local_player.set_volume(30)
         self.local_player.weapons_init()
         self.sound_channel_cnt += 1
         self.player_id.append(id)
-        self.network.player_init(id, team)
-        self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id)
         self.visible_sprites.set_local_player(self.local_player)
                      
     def event_handle(self, events : list[pygame.event.EventType]):

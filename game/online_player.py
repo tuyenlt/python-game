@@ -32,7 +32,6 @@ class OnlinePlayer(Player):
             self.dead = data['dead']
         
         if data['firing'] == True:
-            print("boom boom")
             self.fire()
             pass
         

@@ -80,9 +80,17 @@ class Game:
                                         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                                             print(f"{sub_name} button clicked")
                                             self.menu.toggle()
-                            self.map = Map('toan', "t")
+                            if not self.map:
+                                self.map = Map('toan', "t")
+                            else:
+                                self.map.local_player.switch_team("t")
+                                self.map.network.change_team_request(self.map.local_player.id,"t")
                         elif name == 'Counter-Terrorists' :
-                            self.map = Map('tuyen', "ct")
+                            if not self.map:
+                                self.map = Map('tuyen', "ct")
+                            else:
+                                self.map.local_player.switch_team("ct")
+                                self.map.network.change_team_request(self.map.local_player.id,"ct")
                         else :
                             self.menu.toggle()
                             
