@@ -24,7 +24,7 @@ class Map:
         self.bullets = []
         self.bullets_data = []
         self.player_id = []
-        self.network = Network()
+        # self.network = Network()
         
         # self.select_team = None
         self.create_map(id, team)
@@ -45,9 +45,6 @@ class Map:
         
         # UI
         self.ui = UI()
-        
-    def set_team(self, team):
-        self.select_team = team
         
     def create_map(self, id, team):
         layouts = {
@@ -80,8 +77,8 @@ class Map:
             
         self.local_player = Player(spawn_pos,[self.visible_sprites, self.totals_player], self.obstacles_sprites, team, id)
         self.player_id.append(id)
-        self.network.player_init(id, team)
-        self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id)
+        # self.network.player_init(id, team)
+        # self.local_player.respawn_call_back = partial(self.network.respawn_request, self.local_player.id)
         self.local_player.set_selected_weapon(Gun(self.local_player, name="ak47"))
         self.visible_sprites.set_local_player(self.local_player)
         
@@ -142,7 +139,7 @@ class Map:
         #     self.visible_sprites.update_leg(self.local_player)
         # else :
         self.visible_sprites.update()
-        self.network_update()
+        # self.network_update()
 
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)
