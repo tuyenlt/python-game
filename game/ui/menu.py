@@ -76,7 +76,6 @@ class Menu:
             
             pygame.draw.rect(self.display_surface, (255, 255, 255), self.menu_rect, 2, border_radius=10)
 
-           
             mouse_pos = pygame.mouse.get_pos()
             for name, rect in self.buttons.items():
                 color = (100, 100, 100)  

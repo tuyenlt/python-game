@@ -26,12 +26,18 @@ class Game:
                     if self.map:
                         self.map.network.shut_down()
                     sys.exit()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_m:  
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
                     self.menu.toggle()
-                    
                 self.handle_event(event)
+                    
+                
             if not self.map:
                 self.screen.fill((190,158,108))
+            else :
+                self.screen.fill((255,255,255))
+            
+            self.menu.draw()
+            
             if self.map:
                 self.map.update_pygame_events(self.events)    
                 self.map.run()
@@ -41,7 +47,6 @@ class Game:
                 self.map.pointer_rect.center = pygame.mouse.get_pos()
                 self.screen.blit(self.map.pointer_image, self.map.pointer_rect)
             
-            self.menu.draw()
             
             #show fps
             fps = self.clock.get_fps()
@@ -65,23 +70,23 @@ class Game:
     
     #menu handle event
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and self.menu.active:
-            mouse_pos = pygame.mouse.get_pos()
-            for name, rect in self.menu.buttons.items():
-                if rect.collidepoint(mouse_pos):
-                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        print(f"{name} button clicked")
-                        if name == 'Terrorists' :
-                            self.menu.toggle()
-                            if event.type == pygame.MOUSEBUTTONDOWN and self.menu.sub_menu_active:
-                                for sub_name, sub_rect in self.menu.sub_buttons.items():
-                                    if sub_rect.collidepoint(mouse_pos):
-                                        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                                            print(f"{sub_name} button clicked")
-                                            self.menu.toggle()
-                            self.map = Map('toan', "t")
-                        elif name == 'Counter-Terrorists' :
-                            self.map = Map('tuyen', "ct")
-                        else :
-                            self.menu.toggle()
-                            
+        if self.menu.active:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_pos = pygame.mouse.get_pos()
+                for name, rect in self.menu.buttons.items():
+                    if rect.collidepoint(mouse_pos):
+                            print(f"{name} button clicked")
+                            if name == 'Terrorists' :
+                                # self.menu.toggle()
+                                
+                                self.map = Map('toan', "t")
+                            elif name == 'Counter-Terrorists' :
+                                self.map = Map('tuyen', "ct")
+                            else :
+                                self.menu.toggle()
+            elif self.menu.sub_menu_active:
+                for sub_name, sub_rect in self.menu.sub_buttons.items():
+                    if sub_rect.collidepoint(mouse_pos):
+                        self.menu.toggle()
+                        print(f"{sub_name} button clicked")
+
