@@ -24,7 +24,7 @@ class Map:
         self.bullets = []
         self.bullets_data = []
         self.player_id = []
-        # self.network = Network()
+        self.network = Network()
         
         # self.select_team = None
         self.create_map(id, team)
@@ -73,9 +73,6 @@ class Map:
                 if val == 48:
                     self.ct_spawn.append((x,y))
                     
-        
-        # id = input()
-        # team = input()
         if team == "ct":
             spawn_pos = self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-1)]
         elif team == "t":
@@ -145,7 +142,7 @@ class Map:
         #     self.visible_sprites.update_leg(self.local_player)
         # else :
         self.visible_sprites.update()
-        # self.network_update()
+        self.network_update()
 
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)
