@@ -4,7 +4,7 @@ from game.settings import *
 
 class Network:
     def __init__(self):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Change to UDP
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  
         self.client.settimeout(20)
         self.server = "127.0.0.1"
         self.port = 5555
@@ -28,7 +28,6 @@ class Network:
             'flag' : 3,
             'id' : player_id,
         }
-        # Send respawn request to the server
         self.client.sendto(json.dumps(respawn_data).encode(), self.addr)
 
     def player_init(self, player_id, team):
@@ -37,15 +36,11 @@ class Network:
             'id' : player_id,
             'team' : team
         }
-        # Send initialization data to the server
         self.client.sendto(json.dumps(init_data).encode(), self.addr)
 
     def fetch_data(self):
         try:
-            # Send player data to the server
             self.client.sendto(json.dumps(self.local_data).encode(), self.addr)
-            
-            # Receive data from the server
             data, _ = self.client.recvfrom(MAX_DATA_SIZE)
             self.server_data = json.loads(data.decode())
         except socket.timeout:
@@ -65,6 +60,10 @@ class Network:
     
     def shut_down(self):
         try:
-            self.client.close()  # For UDP, close the socket directly
+            disconnected_message = {
+                'flag' : -1,
+            }
+            self.client.sendto(json.dumps(disconnected_message).encode(), self.addr)
+            self.client.close()  
         except Exception as e:
             print(f"Error during shutdown: {e}")

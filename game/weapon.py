@@ -10,14 +10,15 @@ class Weapon(pygame.sprite.Sprite):
     sprite_groups = None
     obtacles = None
     @classmethod
-    def set_sprite_groups(cls, sprite_groups, obtacles): #! call this func before create any object
+    def init(cls, sprite_groups, obtacles): #! call this func before create any object
         cls.sprite_groups = sprite_groups
         cls.obtacles = obtacles
-    
-    def __init__(self, owner, name="", sound_init = True):
+        
+    def __init__(self, owner, sound_channel, name="" ,sound_init = True):
         super().__init__(self.sprite_groups)
         self.name = name
         self.owner = owner
+        self.sound_channel = sound_channel
         self.type = "single"
         if sound_init:
             self.fire_sound = pygame.mixer.Sound(f"./assets/sounds/weapons/{self.name}.wav")
@@ -40,7 +41,7 @@ class Weapon(pygame.sprite.Sprite):
         self.rect.centerx = self.owner.hitbox.centerx + self.offset_x
         self.rect.centery = self.owner.hitbox.centery + self.offset_y 
         
-    def fire(self, x, y):
+    def fire(self):
         pass
 
     def stop(self):
@@ -52,8 +53,15 @@ class Weapon(pygame.sprite.Sprite):
     
 
 class Gun(Weapon):
-    def __init__(self, owner , name = "ak47"):
-        super().__init__(owner, name)
+    bullets_groups = None
+    bullets_data = None
+    
+    @classmethod
+    def init(cls, bullets_groups):
+        cls.bullets_groups  = bullets_groups
+    
+    def __init__(self, owner , sound_channel, name = "ak47"):
+        super().__init__(owner,sound_channel, name)
         self.gun_attr_init()
         self.reload_start_sound = pygame.mixer.Sound("./assets/sounds/weapons/reloadstart.wav")
         self.reload_end_sound = pygame.mixer.Sound("./assets/sounds/weapons/reloadend.wav")
@@ -107,7 +115,7 @@ class Gun(Weapon):
             self.dmg = 10
         self.bullets_remain = self.max_bullets
         
-    def fire(self, bullets_list = [], bullets_data = []):
+    def fire(self):
         if self.bullets_remain == 0 or self.reloading:
             return
         if self.type == "auto":
@@ -127,12 +135,11 @@ class Gun(Weapon):
             recoil = 0
             
         self.fire_cooldown = self.fire_rate
-        self.fire_sound.stop()
-        self.fire_sound.play()
+        self.sound_channel.play(self.fire_sound)
         self.bullets_remain -= 1
         new_bullet = LineBullet(self.owner.hitbox.center, self.angle + recoil, self.owner.id, self.dmg)
-        bullets_list.append(new_bullet)
-        bullets_data.append(new_bullet.to_object_value())
+        self.bullets_groups.append(new_bullet)
+        self.owner.bullets.append(new_bullet.to_object_value())
     
     def reset(self):
         self.bullets_remain = self.max_bullets
@@ -144,9 +151,9 @@ class Gun(Weapon):
         self.fire_cooldown -= 1 / FPS
         if self.bullets_remain == 0 or self.reloading:
             if self.reload_time_cnt == self.reload_time:
-                self.reload_start_sound.play()
+                self.sound_channel.play(self.reload_start_sound)
             if abs(int(self.reload_time_cnt * 100) - 150) <= 100 / FPS:
-                self.reload_end_sound.play()
+                self.sound_channel.play(self.reload_end_sound)
             self.reload_time_cnt -= 1 / FPS
             if self.reload_time_cnt <= 0:
                 self.reload_time_cnt = self.reload_time
@@ -156,22 +163,25 @@ class Gun(Weapon):
 
 
 class Knife(Weapon):
-    def __init__(self, owner):
-        super().__init__(owner, 'knife')
+    def __init__(self, owner, sound_channel):
+        super().__init__(owner,sound_channel , 'knife')
         self.type = "auto"
         self.slash_cooldown = 0
         self.slash_delay = 0.4
-        self.net_data = []
     
-    def fire(self, x, y):
+    def fire(self):
         if self.slash_cooldown > 0:
             return
         (x, y) = self.rect.topleft
-        self.net_data = [x, y, self.rect.width, self.rect.height, self.owner.id]
+        net_data = [x, y, self.rect.width, self.rect.height, self.owner.id]
+        self.owner.knife_sl.append(net_data)
         self.slash_cooldown = 0.4
-        self.fire_sound.play()
+        self.sound_channel.play(self.fire_sound)
         self.owner.onslash = True
         self.owner.knife_slash_animation()  
+    
+    def reset(self):
+        self.slash_cooldown = self.slash_delay    
         
     def update(self, *args, **kwargs):
         if self.slash_cooldown > 0:
@@ -181,8 +191,8 @@ class Knife(Weapon):
 
 
 class Grenade(Weapon):
-    def __init__(self, owner, name = "he"):
-        super().__init__(owner, name, False)
+    def __init__(self, owner,sound_channel, name = "he"):
+        super().__init__(owner,sound_channel, name, False)
         self.explode_sound = pygame.mixer.Sound("./assets/sounds/weapons/explode1.wav")
         self.bullets_remain = 3
         self.throw_speed = 10
@@ -195,6 +205,7 @@ class Grenade(Weapon):
         self.explode_img_sheet = pygame.transform.scale(pygame.image.load("./assets/gfx/explosion.png"),(640,640))
         self.on_explode = False
         self.explode_img_index = 0
+        self.data_send = False
     
     def grenade_init(self):
         if self.name == "he":
@@ -209,7 +220,7 @@ class Grenade(Weapon):
             self.image = self.org_image
             super().rotate(angle)
     
-    def fire(self, x, y):
+    def fire(self):
         self.onthrow = True
         if self.throw_hook.finished and self.bullets_remain > 0:
             self.bullets_remain -= 1
@@ -220,6 +231,7 @@ class Grenade(Weapon):
         self.onthrow = False
         self.on_explode = False
         self.explode_img_index = 0
+        self.data_send = False
         if self.bullets_remain == 0:
             self.owner.switch_to_primary_weapon()
             self.sprite_groups.remove(self)
@@ -229,11 +241,15 @@ class Grenade(Weapon):
         if self.onthrow:
             self.throw_hook.count_down(1/FPS)               
             if abs(int(self.throw_hook.time_cnt * 100) - 60 * 2.5) <= 100 / FPS:
-                self.explode_sound.play()
+                self.sound_channel.play(self.explode_sound)
+                            
             if self.throw_hook.time_cnt >= 0.42 * 2.5:
                 self.rect.centerx += self.offset_x
                 self.rect.centery += self.offset_y
             else:
+                if not self.data_send:
+                    self.data_send = True
+                    self.owner.explode_nade.append((self.rect.centerx, self.rect.centery, self.owner.id))
                 self.image = get_sprite_from_sheet(self.explode_img_sheet, 128, int(self.explode_img_index))
                 self.explode_img_index += 1/2.5
             
