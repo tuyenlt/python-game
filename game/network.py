@@ -30,6 +30,14 @@ class Network:
         }
         self.client.sendto(json.dumps(respawn_data).encode(), self.addr)
 
+    def change_team_request(self, player_id, team):
+        data = {
+            'flag' : 4,
+            'id' : player_id,
+            'team' : team,
+        }
+        self.client.sendto(json.dumps(data).encode(), self.addr)
+        
     def player_init(self, player_id, team):
         init_data = {
             'flag' : 1,
@@ -37,7 +45,9 @@ class Network:
             'team' : team
         }
         self.client.sendto(json.dumps(init_data).encode(), self.addr)
-
+        data, _ = self.client.recvfrom(MAX_DATA_SIZE)
+        return json.loads(data.decode())
+    
     def fetch_data(self):
         try:
             self.client.sendto(json.dumps(self.local_data).encode(), self.addr)

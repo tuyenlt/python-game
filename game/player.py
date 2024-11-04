@@ -15,8 +15,9 @@ class Player(pygame.sprite.Sprite):
         self.sprite_groups = sprite_groups[0]
         #* display init
         self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}1.bmp").convert_alpha()
-        self.org_image = get_tile_texture(f'./assets/gfx/player/{team}1.bmp', 0, 64)
+        self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
         self.dead_image = pygame.image.load(f"./assets/gfx/player/dead.png")
+        self.dead_sound = pygame.mixer.Sound("./assets/sounds/player/die1.wav")
         
         self.image = self.org_image
         self.obtacles_sprites = obtacles_sprites
@@ -41,9 +42,6 @@ class Player(pygame.sprite.Sprite):
         
         self.dead = False
         self.firing = False
-        self.respawn_pos = spawn_pos
-        self.respawn_call_back = None
-        self.respawn_hook = TimerCallback(2, self.respawn)
         self.bullets = []
         self.knife_sl = []
         self.explode_nade = []
@@ -68,6 +66,16 @@ class Player(pygame.sprite.Sprite):
         
     def sound_channel_init(self, sound_channel):
         self.sound_channel = sound_channel
+    
+    def switch_team(self, team):
+        self.team = team
+        for weapon in self.weapons_list:
+            if weapon != None:
+                weapon.kill()
+        self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}1.bmp").convert_alpha() 
+        self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
+        self.weapons_init() 
+        
     
     def set_volume(self, volume):
         self.sound_channel.set_volume(volume)
@@ -196,42 +204,34 @@ class Player(pygame.sprite.Sprite):
     
     def load_data(self, data):
         self.hp = data['hp']
-        if self.dead == False:
-            self.dead = data['dead']
-    
-    def fire(self):
-        if self.selected_weapon:
-            self.selected_weapon.fire()
-    
-    def respawn(self):
-        print("respawn call")
-        self.rect.topleft = self.respawn_pos
-        self.hitbox.center = self.rect.center
-        self.hp = 100
-        self.dead = False
-        self.respawn_call_back()
-        self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
-        self.sprite_index = 0
-        Gun.sprite_groups.add(self.selected_weapon)
-        for weapon in self.weapons_list:
-            if weapon != None:
-                weapon.reset()
-        
-    def update(self):
-        if self.onslash:
-            self.knife_slash_animation()
-        if self.dead:
-            if self.respawn_hook.time_cnt == self.respawn_hook.delay_time:
-                print("pass")
+        if self.dead != data['dead']:
+            if data['dead'] == True:
+                self.sound_channel.play(self.dead_sound)
                 self.org_image = self.dead_image
                 self.image = self.org_image
                 self.rect = self.image.get_rect()
                 self.rect.center = self.hitbox.center
                 Gun.sprite_groups.remove(self.selected_weapon)
-                self.sprite_index = -1
-                
-            self.respawn_hook.count_down(1/FPS)
-        else:
+                self.sprite_index = -1                
+            else:
+                for weapon in self.weapons_list:
+                    if weapon != None:
+                        weapon.reset()
+                self.hitbox.center = data['pos']
+                Gun.sprite_groups.add(self.selected_weapon)
+                self.switch_to_primary_weapon()
+                self.rect = self.image.get_rect()
+                self.rect.center = self.hitbox.center
+            self.dead = data['dead']
+    
+    def fire(self):
+        if self.selected_weapon:
+            self.selected_weapon.fire()
+        
+    def update(self):
+        if self.onslash:
+            self.knife_slash_animation()
+        if not self.dead:           
             self.handle_key_input()
             self.handle_movement()
             self.handle_angle()
@@ -247,7 +247,8 @@ class Player(pygame.sprite.Sprite):
             'bullets' : self.bullets,
             'knife_sl': self.knife_sl,
             'nade': self.explode_nade,
-            'firing': self.firing
+            'firing': self.firing,
+            'dead': self.dead
         }
         return data
         
