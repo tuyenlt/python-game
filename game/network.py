@@ -1,6 +1,7 @@
 import socket
 import json
 from game.settings import *
+import time
 
 class Network:
     def __init__(self):
@@ -74,6 +75,7 @@ class Network:
                 'flag' : -1,
             }
             self.client.sendto(json.dumps(disconnected_message).encode(), self.addr)
+            time.sleep(0.5)
             self.client.close()  
         except Exception as e:
             print(f"Error during shutdown: {e}")
