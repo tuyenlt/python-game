@@ -5,7 +5,7 @@ class Menu:
     def __init__(self, manager):
         self.manager = manager
         self.display_surface = pygame.display.get_surface()
-        self.font = pygame.font.Font('assets/fonts/korean.ttf', 20)
+        self.font = pygame.font.Font('../assets/fonts/korean.ttf', 20)
         
         # Flags for active menu
         self.main_active = True
@@ -152,6 +152,15 @@ class Menu:
                 self.toggle_menu("Counter-Terrorists")
             elif event.ui_element == self.main_buttons["Close"]:
                 self.toggle_menu("Close")
+            for index, button in enumerate(self.terrorists_buttons):
+                if event.ui_element == self.terrorists_buttons[button]:
+                    print("t",index + 1)
+                    self.toggle_menu("Close")
+            for index, button in enumerate(self.counter_terrorists_buttons):
+                if event.ui_element == self.counter_terrorists_buttons[button]:
+                    print("ct", index + 1)
+                    self.toggle_menu("Close")
+                    
 
 
 # Initialize Pygame and Pygame GUI
@@ -181,7 +190,9 @@ while running:
 
     # Update GUI manager
     manager.update(time_delta)
-
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_m]:
+        menu.toggle_menu("main")
     # Draw everything
     screen.fill((200, 200, 200))
     manager.draw_ui(screen)
