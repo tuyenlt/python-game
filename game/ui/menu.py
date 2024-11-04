@@ -1,191 +1,114 @@
 import pygame
-import pygame_gui
 
 class Menu:
-    def __init__(self, manager):
-        self.manager = manager
+	# def draw(self, surface):
+	# 	action = False
+	# 	#get mouse position
+	# 	pos = pygame.mouse.get_pos()
+
+	# 	#check mouseover and clicked conditions
+	# 	if self.rect.collidepoint(pos):
+	# 		if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+	# 			self.clicked = True
+	# 			action = True
+
+	# 	if pygame.mouse.get_pressed()[0] == 0:
+	# 		self.clicked = False
+
+	# 	#draw button on screen
+	# 	surface.blit(self.image, (self.rect.x, self.rect.y))
+
+	# 	return action
+    def __init__(self):
         self.display_surface = pygame.display.get_surface()
-        self.font = pygame.font.Font('assets/fonts/korean.ttf', 20)
-        
-        # Flags for active menu
-        self.main_active = True
+        self.font = pygame.font.Font('assets/fonts/korean.ttf', 20)  
+        self.main_active = True 
         self.terrorists_menu_active = False
         self.counter_terrorists_menu_active = False
         
-        # Create UI containers for each menu section
-        self.main_container = pygame_gui.core.UIContainer(
-            pygame.Rect(100, 100, 600, 400), manager=manager, anchors={'center': 'center'}
-        )
-        self.terrorists_container = pygame_gui.core.UIContainer(
-            pygame.Rect(100, 100, 600, 400), manager=manager, anchors={'center': 'center'}
-        )
-        self.counter_terrorists_container = pygame_gui.core.UIContainer(
-            pygame.Rect(100, 100, 600, 400), manager=manager, anchors={'center': 'center'}
-        )
+        self.menu_rect = pygame.Rect(0, 0, 600, 400)
+        self.menu_rect.center = (self.display_surface.get_width() // 2, self.display_surface.get_height() // 2)
+
+        self.main_buttons = self.create_main_buttons()
+        self.terrorists_buttons = self.create_terrorists_menu_buttons()
+        self.counter_terrorists_buttons = self.create_counter_terrorists_menu_buttons()
         
-        # Create buttons in each container
-        self.create_main_buttons()
-        self.create_terrorists_menu_buttons()
-        self.create_counter_terrorists_menu_buttons()
+        self.buttons = self.create_main_buttons()
         
-        # Set initial visibility
-        self.terrorists_container.hide()
-        self.counter_terrorists_container.hide()
 
     def create_main_buttons(self):
-        # Main menu buttons
-        self.main_buttons = {
-            "Terrorists": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 50, 300, 50),
-                text="Terrorists",
-                manager=self.manager,
-                container=self.main_container
-            ),
-            "Counter-Terrorists": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 130, 300, 50),
-                text="Counter-Terrorists",
-                manager=self.manager,
-                container=self.main_container
-            ),
-            "Close": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 210, 300, 50),
-                text="Close",
-                manager=self.manager,
-                container=self.main_container
-            )
+        main_buttons = {
+            "Terrorists": pygame.Rect(0, 0, 300, 50),
+            "Counter-Terrorists": pygame.Rect(0, 0, 300, 50),
+            "Close": pygame.Rect(0, 0, 300, 50),
         }
+
+        
+        y_start = self.menu_rect.top + 50
+        for i, rect in enumerate(main_buttons.values()):
+            rect.centerx = self.menu_rect.centerx
+            rect.y = y_start + i * 70 
+
+        return main_buttons
 
     def create_terrorists_menu_buttons(self):
-        # Terrorists menu buttons
-        self.terrorists_buttons = {
-            "Phoenix Connexion": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 50, 300, 50),
-                text="Phoenix Connexion",
-                manager=self.manager,
-                container=self.terrorists_container
-            ),
-            "L337 Krew": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 110, 300, 50),
-                text="L337 Krew",
-                manager=self.manager,
-                container=self.terrorists_container
-            ),
-            "Arctic Avengers": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 170, 300, 50),
-                text="Arctic Avengers",
-                manager=self.manager,
-                container=self.terrorists_container
-            ),
-            "Guerilla Warfare": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 230, 300, 50),
-                text="Guerilla Warfare",
-                manager=self.manager,
-                container=self.terrorists_container
-            ),
-            "Auto-Select": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 290, 300, 50),
-                text="Auto-Select",
-                manager=self.manager,
-                container=self.terrorists_container
-            )
-        }
-
-    def create_counter_terrorists_menu_buttons(self):
-        # Counter-terrorists menu buttons
-        self.counter_terrorists_buttons = {
-            "SEAL Team 6": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 50, 300, 50),
-                text="SEAL Team 6",
-                manager=self.manager,
-                container=self.counter_terrorists_container
-            ),
-            "GSG 9": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 110, 300, 50),
-                text="GSG 9",
-                manager=self.manager,
-                container=self.counter_terrorists_container
-            ),
-            "SAS": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 170, 300, 50),
-                text="SAS",
-                manager=self.manager,
-                container=self.counter_terrorists_container
-            ),
-            "GIGN": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 230, 300, 50),
-                text="GIGN",
-                manager=self.manager,
-                container=self.counter_terrorists_container
-            ),
-            "Auto-Select": pygame_gui.elements.UIButton(
-                relative_rect=pygame.Rect(150, 290, 300, 50),
-                text="Auto-Select",
-                manager=self.manager,
-                container=self.counter_terrorists_container
-            )
-        }
-
-    def toggle_menu(self, menu_name):
-        # Toggle visibility of menus based on menu_name
-        if menu_name == "Terrorists":
-            self.main_container.hide()
-            self.terrorists_container.show()
-            self.counter_terrorists_container.hide()
-        elif menu_name == "Counter-Terrorists":
-            self.main_container.hide()
-            self.counter_terrorists_container.show()
-            self.terrorists_container.hide()
-        elif menu_name == "Close":
-            self.main_container.hide()
-            self.terrorists_container.hide()
-            self.counter_terrorists_container.hide()
-        else:
-            self.main_container.show()
-            self.terrorists_container.hide()
-            self.counter_terrorists_container.hide()
-
-    def handle_event(self, event):
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            if event.ui_element == self.main_buttons["Terrorists"]:
-                self.toggle_menu("Terrorists")
-            elif event.ui_element == self.main_buttons["Counter-Terrorists"]:
-                self.toggle_menu("Counter-Terrorists")
-            elif event.ui_element == self.main_buttons["Close"]:
-                self.toggle_menu("Close")
-
-
-# Initialize Pygame and Pygame GUI
-pygame.init()
-pygame.display.set_caption("Pygame GUI Menu Example")
-screen = pygame.display.set_mode((800, 600))
-
-# Pygame GUI Manager
-manager = pygame_gui.UIManager((800, 600))
-
-# Create Menu instance
-menu = Menu(manager)
-
-clock = pygame.time.Clock()
-
-# Main loop
-running = True
-while running:
-    time_delta = clock.tick(60) / 1000.0
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
         
-        # Pass events to the GUI manager and menu
-        manager.process_events(event)
-        menu.handle_event(event)
+        terrorists_buttons = {
+            "Phoenix Connexion": pygame.Rect(0, 0, 300, 50),
+            "L337 Krew": pygame.Rect(0, 0, 300, 50),
+            "Arctic Avengers": pygame.Rect(0, 0, 300, 50),
+            "Guerilla Warfare": pygame.Rect(0, 0, 300, 50),
+            "Auto-Select": pygame.Rect(0, 0, 300, 50),
+        }
+        y_start = self.menu_rect.top + 50
+        for i, rect in enumerate(terrorists_buttons.values()):
+            rect.centerx = self.menu_rect.centerx
+            rect.y = y_start + i * 60
+        return terrorists_buttons
+        
+    def create_counter_terrorists_menu_buttons(self):
+        counter_terrorists_buttons = {
+            "SEAL Team 6": pygame.Rect(0, 0, 300, 50),
+            "GSG 9": pygame.Rect(0, 0, 300, 50),
+            "SAS": pygame.Rect(0, 0, 300, 50),
+            "GIGN": pygame.Rect(0, 0, 300, 50),
+            "Auto-Select": pygame.Rect(0, 0, 300, 50),
+        }
+        y_start = self.menu_rect.top + 50
+        for i, rect in enumerate(counter_terrorists_buttons.values()):
+            rect.centerx = self.menu_rect.centerx
+            rect.y = y_start + i * 60
+        return counter_terrorists_buttons
+    def toggle(self):
+        self.main_active = not self.main_active
+        # self.sub_menu_active = not self.sub_menu_active
 
-    # Update GUI manager
-    manager.update(time_delta)
+    def draw(self):
+        if self.main_active:
+            self.draw_menu()
+            # if self.sub_menu_active:
+            #     self.toggle()
+            #     self.draw_sub_menu()
 
-    # Draw everything
-    screen.fill((200, 200, 200))
-    manager.draw_ui(screen)
+    def draw_menu(self):        
+            s = pygame.Surface((self.display_surface.get_width(), self.display_surface.get_height()))
+            s.set_alpha(0)  
+            s.fill((190,158,108))
+            self.display_surface.blit(s, (0, 0))
+            
+            menu_surface = pygame.Surface(self.menu_rect.size)
+            menu_surface.fill((50, 50, 50)) 
+            menu_surface.set_alpha(128)  
+            self.display_surface.blit(menu_surface, self.menu_rect.topleft)
+            pygame.draw.rect(self.display_surface, (255, 255, 255), self.menu_rect, 2, border_radius=10)
 
-    pygame.display.flip()
+            mouse_pos = pygame.mouse.get_pos()
+            for name, rect in self.buttons.items():
+                color = (100, 100, 100)  
+                if rect.collidepoint(mouse_pos):
+                    color = (150, 150, 150)
 
-pygame.quit()
+                pygame.draw.rect(self.display_surface, color, rect, border_radius=10)
+                text_surf = self.font.render(name, True, (255, 255, 255))
+                text_rect = text_surf.get_rect(center=rect.center)
+                self.display_surface.blit(text_surf, text_rect)

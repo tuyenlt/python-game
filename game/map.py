@@ -12,6 +12,7 @@ from game.input_event import InputEvent
 from game.leg import Leg
 from game.ultis.func import distance
 from game.ui.message_bar import MessageBar
+from game.ui.stat import StatsMenu
 
 from game.ui.ui import UI
 class Map:
@@ -27,6 +28,7 @@ class Map:
         self.mouse_clicking = False
         self.sound_channel_cnt = 0
         self.msg_bar = MessageBar((SRC_WIDTH - 400, 100), (400, SRC_HEIGHT - 200), 80)
+        self.stats_menu = StatsMenu(800, 600)
         
         LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
         Weapon.init(self.visible_sprites, self.obstacles_sprites)
@@ -79,6 +81,12 @@ class Map:
             if event.type ==  pygame.MOUSEBUTTONUP:                
                 if event.button == 1:
                     self.mouse_clicking = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_TAB:
+                   self.stats_menu.show()
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_TAB:
+                    self.stats_menu.hide()
                     
         if self.local_player.selected_weapon.type == "auto":
             self.local_player.firing = self.mouse_clicking
@@ -127,7 +135,8 @@ class Map:
             if player.firing == True:
                 print("boom boom")
                 player.fire()
-        self.msg_bar.update(self.network.server_data['msg'])                
+        self.msg_bar.update(self.network.server_data['msg'])  
+        self.stats_menu.update_players_stat(self.network.server_data['stat'])              
                      
     def run(self, mouse_clicking = False):
         self.volume_control()
@@ -136,6 +145,7 @@ class Map:
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)
         self.msg_bar.display()
+        self.stats_menu.draw(self.display_surface, (250, 60))
                 
         
 class CameraGroup(pygame.sprite.Group):
