@@ -28,6 +28,7 @@ class Game:
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_m:  
                     self.menu.toggle()
+                    self.menu.buttons = self.menu.main_buttons
                     
                 self.handle_event(event)
             if self.map:
@@ -62,30 +63,29 @@ class Game:
             
             
             pygame.display.update()
-            self.clock.tick(FPS)
-    
-    #menu handle event
+            self.clock.tick(FPS)                       
+                            
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and self.menu.active:
+        if event.type == pygame.MOUSEBUTTONDOWN and self.menu.main_active:
             mouse_pos = pygame.mouse.get_pos()
             for name, rect in self.menu.buttons.items():
                 if rect.collidepoint(mouse_pos):
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         print(f"{name} button clicked")
                         if name == 'Terrorists' :
-                            self.menu.toggle()
-                            if event.type == pygame.MOUSEBUTTONDOWN and self.menu.sub_menu_active:
-                                for sub_name, sub_rect in self.menu.sub_buttons.items():
-                                    if sub_rect.collidepoint(mouse_pos):
-                                        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                                            print(f"{sub_name} button clicked")
-                                            self.menu.toggle()
+                            self.menu.buttons = self.menu.terrorists_buttons
+                            for sub_name, sub_rect in self.menu.buttons.items() :
+                                pass
+                            
                             if not self.map:
                                 self.map = Map('toan', "t")
                             else:
                                 self.map.local_player.switch_team("t")
                                 self.map.network.change_team_request(self.map.local_player.id,"t")
                         elif name == 'Counter-Terrorists' :
+                            self.menu.buttons = self.menu.counter_terrorists_buttons
+                            for sub_name, sub_rect in self.menu.buttons.items() :
+                                pass
                             if not self.map:
                                 self.map = Map('tuyen', "ct")
                             else:
@@ -93,4 +93,4 @@ class Game:
                                 self.map.network.change_team_request(self.map.local_player.id,"ct")
                         else :
                             self.menu.toggle()
-                            
+    

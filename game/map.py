@@ -48,9 +48,6 @@ class Map:
         # UI
         self.ui = UI()
         
-    def set_team(self, team):
-        self.select_team = team
-        
     def create_map(self, id, team):
         layouts = {
             'boundary': import_csv_layout('./assets/maps/dust2/dust2.csv',range(5,30)),
