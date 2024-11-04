@@ -15,7 +15,7 @@ from game.ui.message_bar import MessageBar
 from game.ui.stat import StatsMenu
 
 from game.ui.ui import UI
-class Map:
+class GameClient:
     def __init__(self, id, team):
         self.display_surface =  pygame.display.get_surface() 
         self.visible_sprites = CameraGroup()

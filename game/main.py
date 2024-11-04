@@ -1,7 +1,7 @@
 import pygame, sys
 from pygame.locals import *
 from game.settings import *
-from game.map import Map
+from game.gameclient import GameClient
 from game.ui.button import Button
 from game.ui.menu import Menu
 
@@ -12,7 +12,7 @@ class Game:
         self.screen = pygame.display.set_mode((SRC_WIDTH, SRC_HEIGHT))
         pygame.display.set_caption("2D Shootting")
         self.clock = pygame.time.Clock()
-        self.map = None
+        self.game_client = None
         self.events = NOEVENT
         
         self.font = pygame.font.Font('assets/fonts/digital-7.ttf', 30)
@@ -23,25 +23,25 @@ class Game:
             self.events = pygame.event.get()
             for event in self.events:
                 if event.type == pygame.QUIT:
-                    if self.map:
-                        self.map.network.shut_down(self.map.local_player.id)
+                    if self.game_client:
+                        self.game_client.network.shut_down(self.game_client.local_player.id)
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_m:  
                     self.menu.toggle()
                     self.menu.buttons = self.menu.main_buttons
                     
                 self.handle_event(event)
-            if self.map:
+            if self.game_client:
                 self.screen.fill((255,255,255))
-                self.map.event_handle(self.events)    
-                self.map.run()
+                self.game_client.event_handle(self.events)    
+                self.game_client.run()
             else:
                 self.screen.fill((190,158,108))
             
             #draw pointer
-            if self.map:
-                self.map.pointer_rect.center = pygame.mouse.get_pos()
-                self.screen.blit(self.map.pointer_image, self.map.pointer_rect)
+            if self.game_client:
+                self.game_client.pointer_rect.center = pygame.mouse.get_pos()
+                self.screen.blit(self.game_client.pointer_image, self.game_client.pointer_rect)
             
             self.menu.draw()
             
@@ -77,20 +77,20 @@ class Game:
                             for sub_name, sub_rect in self.menu.buttons.items() :
                                 pass
                             
-                            if not self.map:
-                                self.map = Map('toan', "t")
+                            if not self.game_client:
+                                self.game_client = GameClient('toan', "t")
                             else:
-                                self.map.local_player.switch_team("t")
-                                self.map.network.change_team_request(self.map.local_player.id,"t")
+                                self.game_client.local_player.switch_team("t")
+                                self.game_client.network.change_team_request(self.game_client.local_player.id,"t")
                         elif name == 'Counter-Terrorists' :
                             self.menu.buttons = self.menu.counter_terrorists_buttons
                             for sub_name, sub_rect in self.menu.buttons.items() :
                                 pass
-                            if not self.map:
-                                self.map = Map('tuyen', "ct")
+                            if not self.game_client:
+                                self.game_client = GameClient('tuyen', "ct")
                             else:
-                                self.map.local_player.switch_team("ct")
-                                self.map.network.change_team_request(self.map.local_player.id,"ct")
+                                self.game_client.local_player.switch_team("ct")
+                                self.game_client.network.change_team_request(self.game_client.local_player.id,"ct")
                         else :
                             self.menu.toggle()
     
