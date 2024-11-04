@@ -11,6 +11,7 @@ from game.weapon import Gun, Knife, Weapon
 from game.input_event import InputEvent
 from game.leg import Leg
 from game.ultis.func import distance
+from game.ui.message_bar import MessageBar
 
 from game.ui.ui import UI
 class Map:
@@ -25,6 +26,7 @@ class Map:
         self.network = Network()
         self.mouse_clicking = False
         self.sound_channel_cnt = 0
+        self.msg_bar = MessageBar((SRC_WIDTH - 400, 100), (400, SRC_HEIGHT - 200), 80)
         
         LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
         Weapon.init(self.visible_sprites, self.obstacles_sprites)
@@ -125,6 +127,7 @@ class Map:
             if player.firing == True:
                 print("boom boom")
                 player.fire()
+        self.msg_bar.update(self.network.server_data['msg'])                
                      
     def run(self, mouse_clicking = False):
         self.volume_control()
@@ -132,6 +135,7 @@ class Map:
         self.network_update()
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
         self.ui.display(self.local_player)
+        self.msg_bar.display()
                 
         
 class CameraGroup(pygame.sprite.Group):
