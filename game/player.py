@@ -14,7 +14,8 @@ class Player(pygame.sprite.Sprite):
         super().__init__(sprite_groups)
         self.sprite_groups = sprite_groups[0]
         #* display init
-        self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}1.bmp").convert_alpha()
+        self.cloth_index= "1"
+        self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}{self.cloth_index}.bmp").convert_alpha()
         self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
         self.dead_image = pygame.image.load(f"./assets/gfx/player/dead.png")
         self.dead_sound = pygame.mixer.Sound("./assets/sounds/player/die1.wav")

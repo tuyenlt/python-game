@@ -1,12 +1,10 @@
 import pygame
 
-class Menu:
+class Scoreboard:
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
-        self.font = pygame.font.Font('assets/fonts/korean.ttf', 20)  
-        self.main_active = True 
-        self.terrorists_menu_active = False
-        self.counter_terrorists_menu_active = False
+        self.font = pygame.font.Font('assets/fonts/korean.ttf', 5)  
+        self.main_active = False
         
         self.menu_rect = pygame.Rect(0, 0, 600, 400)
         self.menu_rect.center = (self.display_surface.get_width() // 2, self.display_surface.get_height() // 2)

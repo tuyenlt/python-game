@@ -4,6 +4,7 @@ from game.settings import *
 from game.map import Map
 from game.ui.button import Button
 from game.ui.menu import Menu
+# from game.ui.scoreboard import Scoreboard
 
 class Game:
     def __init__(self):
@@ -17,6 +18,7 @@ class Game:
         
         self.font = pygame.font.Font('assets/fonts/digital-7.ttf', 30)
         self.menu = Menu()
+        # self.scoreboard = Scoreboard()
         
     def run(self):
         while True:
@@ -29,6 +31,12 @@ class Game:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_m:  
                     self.menu.toggle()
                     self.menu.buttons = self.menu.main_buttons
+                # if event.type == pygame.KEYDOWN:
+                #     if event.key == pygame.K_TAB:
+                #         self.scoreboard.show_scoreboard = True  # Hiển thị bảng điểm
+                # elif event.type == pygame.KEYUP:
+                #     if event.key == pygame.K_TAB:
+                #         self.scoreboard.show_scoreboard = False  # Ẩn bảng điểm
                     
                 self.handle_event(event)
             if self.map:
@@ -74,23 +82,20 @@ class Game:
                         print(f"{name} button clicked")
                         if name == 'Terrorists' :
                             self.menu.buttons = self.menu.terrorists_buttons
-                            for sub_name, sub_rect in self.menu.buttons.items() :
-                                pass
-                            
                             if not self.map:
                                 self.map = Map('toan', "t")
                             else:
                                 self.map.local_player.switch_team("t")
                                 self.map.network.change_team_request(self.map.local_player.id,"t")
+                                
                         elif name == 'Counter-Terrorists' :
                             self.menu.buttons = self.menu.counter_terrorists_buttons
-                            for sub_name, sub_rect in self.menu.buttons.items() :
-                                pass
                             if not self.map:
                                 self.map = Map('tuyen', "ct")
                             else:
                                 self.map.local_player.switch_team("ct")
                                 self.map.network.change_team_request(self.map.local_player.id,"ct")
+                                
                         else :
                             self.menu.toggle()
     
