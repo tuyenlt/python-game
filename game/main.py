@@ -24,7 +24,7 @@ class Game:
             for event in self.events:
                 if event.type == pygame.QUIT:
                     if self.map:
-                        self.map.network.shut_down()
+                        self.map.network.shut_down(self.map.local_player.id)
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_m:  
                     self.menu.toggle()

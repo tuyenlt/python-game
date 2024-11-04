@@ -1,7 +1,6 @@
 import socket
 import json
 from game.settings import *
-import time
 
 class Network:
     def __init__(self):
@@ -69,13 +68,13 @@ class Network:
             print(f"Socket error while listening: {e}")
             return None
     
-    def shut_down(self):
+    def shut_down(self, id):
         try:
             disconnected_message = {
                 'flag' : -1,
+                'id' : id
             }
             self.client.sendto(json.dumps(disconnected_message).encode(), self.addr)
-            time.sleep(0.5)
             self.client.close()  
         except Exception as e:
             print(f"Error during shutdown: {e}")
