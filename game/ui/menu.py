@@ -4,7 +4,7 @@ class Menu:
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font('assets/fonts/korean.ttf', 20)  
-        self.active = True  
+        self.active = True 
         self.sub_menu_active = False
         
         self.menu_rect = pygame.Rect(0, 0, 600, 400)
@@ -54,9 +54,9 @@ class Menu:
     def draw(self):
         if self.active:
             self.draw_main_menu()
-            if self.sub_menu_active:
-                self.toggle()
-                self.draw_sub_menu()
+            # if self.sub_menu_active:
+            #     self.toggle()
+            #     self.draw_sub_menu()
 
     def draw_main_menu(self):
             
