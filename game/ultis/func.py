@@ -76,7 +76,6 @@ class TimerCallback:
             self.call_back_func()
             self.done = True
             self.time_cnt = self.delay_time
-            print("call back finished")
     
     def first_finished(self):
         if self.done:
