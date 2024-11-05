@@ -27,6 +27,7 @@ class OnlinePlayer(Player):
         self.hitbox.center = data['pos']
         self.hp = data['hp']
         self.angle = data['angle']
+        self.leg.curr_sp_index = data['leg_index']
         if self.dead != data['dead']:
             if data['dead'] == False:
                 Gun.sprite_groups.add(self.selected_weapon)

@@ -22,13 +22,13 @@ class ProxyServer:
 
     def create_new_game_server(self, name):
         new_port = self.port + len(self.servers) + 1
-        game_server = Server(self.host, new_port, self.max_client)
+        game_server = Server(self.host, new_port, 12)
         
         server_thread = threading.Thread(target=game_server.run,args=(self.servers,), daemon=True)
         server_thread.start()
 
         
-        self.servers.append((name, HOST, new_port))
+        self.servers.append([name, HOST, new_port, 0])
         print(f"Created new game server on port {new_port}")
         return (HOST, new_port)
 
@@ -50,6 +50,12 @@ class ProxyServer:
                 address = self.create_new_game_server(client_data['name'])
                 response = json.dumps(address).encode()
                 self.socket.sendto(response, addr) 
+            
+            if client_data['flag'] == 3:
+                port = client_data['port']
+                for server in self.servers:
+                    if server[2] == port:
+                        server[3] += 1
         
         except Exception as e:
             print(f"Error: {e}")

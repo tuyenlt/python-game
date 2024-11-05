@@ -66,6 +66,11 @@ class Network:
         return json.loads(data.decode())
     
     def join_server(self, host, port):
+        req = {
+            'flag' : 3,
+            'port' : port
+        }
+        self.client.sendto(json.dumps(req).encode(), (self.server, self.port))
         self.addr = (host, port)
     
     def fetch_data(self):

@@ -6,7 +6,7 @@ from game.settings import *
 from game.ultis.resource_loader import *
 from game.weapon import Gun, Knife, Grenade
 from game.ultis.func import TimerCallback
-
+from game.leg import Leg
 
 class Player(pygame.sprite.Sprite):
     
@@ -46,6 +46,8 @@ class Player(pygame.sprite.Sprite):
         self.knife_sl = []
         self.explode_nade = []
         self.sound_channel = None
+        
+        self.leg = Leg(self)
 
         
     def weapons_init(self):
@@ -167,11 +169,13 @@ class Player(pygame.sprite.Sprite):
     def handle_movement(self):
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
+            self.leg.walk()
         self.hitbox.x += self.direction.x * self.speed   
         self.handle_collision('horizontal')
         self.hitbox.y += self.direction.y * self.speed   
         self.handle_collision('vertical')
         self.rect.center = self.hitbox.center
+        
     
     def handle_angle(self):
         if not self.onslash:
@@ -186,6 +190,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = self.hitbox.center
         if self.selected_weapon:
             self.selected_weapon.rotate(-self.angle)
+        self.leg.rotate(-self.angle)           
         
     
     def display(self, surf, offset):
@@ -212,12 +217,15 @@ class Player(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.center = self.hitbox.center
                 Gun.sprite_groups.remove(self.selected_weapon)
-                self.sprite_index = -1                
+                Leg.sprite_group.remove(self.leg)
+                self.sprite_index = -1
+                                
             else:
                 for weapon in self.weapons_list:
                     if weapon != None:
                         weapon.reset()
                 self.hitbox.center = data['pos']
+                Leg.sprite_group.add(self.leg)
                 Gun.sprite_groups.add(self.selected_weapon)
                 self.switch_to_primary_weapon()
                 self.rect = self.image.get_rect()
@@ -231,7 +239,7 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         if self.onslash:
             self.knife_slash_animation()
-        if not self.dead:           
+        if not self.dead:
             self.handle_key_input()
             self.handle_movement()
             self.handle_angle()
@@ -244,11 +252,13 @@ class Player(pygame.sprite.Sprite):
             'angle' : self.angle,
             'wp_index' : self.selected_weapon_index,
             'sp_index' : self.sprite_index,
+            'leg_index' : self.leg.curr_sp_index,
             'bullets' : self.bullets,
             'knife_sl': self.knife_sl,
             'nade': self.explode_nade,
             'firing': self.firing,
             'dead': self.dead
+            
         }
         return data
         
@@ -256,6 +266,7 @@ class Player(pygame.sprite.Sprite):
         for weapon in self.weapons_list:
             if weapon != None:
                 weapon.kill()
+        self.leg.kill()
         super().kill()        
     
         
