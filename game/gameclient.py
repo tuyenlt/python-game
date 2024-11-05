@@ -14,6 +14,7 @@ from game.ultis.func import distance
 from game.ui.message_bar import MessageBar
 from game.ui.stat import StatsMenu
 from game.ui.msg_popup import MsgPopup
+from game.leg import Leg
 
 from game.ui.ui import UI
 class GameClient:
@@ -35,9 +36,9 @@ class GameClient:
         
         LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
         Weapon.init(self.visible_sprites, self.obstacles_sprites)
+        Leg.init(self.visible_sprites)
         self.create_map(id, team)
         Gun.init(self.bullets)
-        
         # self.select_team = None
         
         
@@ -192,6 +193,13 @@ class CameraGroup(pygame.sprite.Group):
         self.display_surface.blit(self.floor_surf, floor_offset_pos) 
         
         for sprite in self.sprites():
+            if sprite.__class__.__name__ == 'Leg':
+                offset_pos = sprite.rect.topleft - self.offset
+                self.display_surface.blit(sprite.image, offset_pos)
+                
+        for sprite in self.sprites():
+            if sprite.__class__.__name__ == 'Leg':
+                continue
             if sprite.__class__.__name__ == 'Tile':
                 continue
             offset_pos = sprite.rect.topleft - self.offset
