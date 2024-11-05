@@ -6,7 +6,7 @@ import time
 from settings import *
 from gamestate import GameState
 
-HOST = '192.168.1.9'
+HOST = '192.168.1.27'
 PORT = 5555
 
 
