@@ -13,6 +13,7 @@ from game.leg import Leg
 from game.ultis.func import distance
 from game.ui.message_bar import MessageBar
 from game.ui.stat import StatsMenu
+from game.ui.msg_popup import MsgPopup
 
 from game.ui.ui import UI
 class GameClient:
@@ -30,6 +31,7 @@ class GameClient:
         self.msg_bar = MessageBar((SRC_WIDTH - 400, 100), (400, SRC_HEIGHT - 200), 80)
         self.stats_menu = StatsMenu(800, 600)
         self.time = ""
+        self.win_popup = MsgPopup((400,200), (400, 200))
         
         LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
         Weapon.init(self.visible_sprites, self.obstacles_sprites)
@@ -138,9 +140,13 @@ class GameClient:
         self.msg_bar.update(self.network.server_data['msg'])  
         self.stats_menu.update_players_stat(self.network.server_data['stat']) 
         self.time = self.network.server_data['time']  
-        self.win = self.network.server_data['win']
-        if self.win:
-            print(self.win)           
+        if self.network.server_data['win'] == "t":
+            self.win_popup.update("Terrorists Win")
+        if self.network.server_data['win'] == "ct":
+            self.win_popup.update("Counter-Terrorists Win")
+            
+            
+                 
                      
     def run(self, mouse_clicking = False):
         self.volume_control()
@@ -150,6 +156,7 @@ class GameClient:
         self.ui.display(self.local_player, self.time)
         self.msg_bar.display()
         self.stats_menu.draw(self.display_surface, (250, 60))
+        self.win_popup.display()
                 
     def cleanup(self):
         self.network.shut_down(self.local_player.id)
