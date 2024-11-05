@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class Menu:
 	# def draw(self, surface):
@@ -34,6 +35,8 @@ class Menu:
         self.counter_terrorists_buttons = self.create_counter_terrorists_menu_buttons()
         
         self.buttons = self.create_main_buttons()
+        self.done = False
+        self.val = ""
         
 
     def create_main_buttons(self):
@@ -54,11 +57,11 @@ class Menu:
     def create_terrorists_menu_buttons(self):
         
         terrorists_buttons = {
-            "Phoenix Connexion": pygame.Rect(0, 0, 300, 50),
-            "L337 Krew": pygame.Rect(0, 0, 300, 50),
-            "Arctic Avengers": pygame.Rect(0, 0, 300, 50),
-            "Guerilla Warfare": pygame.Rect(0, 0, 300, 50),
-            "Auto-Select": pygame.Rect(0, 0, 300, 50),
+            "1. Phoenix Connexion": pygame.Rect(0, 0, 300, 50),
+            "2. L337 Krew": pygame.Rect(0, 0, 300, 50),
+            "3. Arctic Avengers": pygame.Rect(0, 0, 300, 50),
+            "4. Guerilla Warfare": pygame.Rect(0, 0, 300, 50),
+            "5. Auto-Select": pygame.Rect(0, 0, 300, 50),
         }
         y_start = self.menu_rect.top + 50
         for i, rect in enumerate(terrorists_buttons.values()):
@@ -68,11 +71,11 @@ class Menu:
         
     def create_counter_terrorists_menu_buttons(self):
         counter_terrorists_buttons = {
-            "SEAL Team 6": pygame.Rect(0, 0, 300, 50),
-            "GSG 9": pygame.Rect(0, 0, 300, 50),
-            "SAS": pygame.Rect(0, 0, 300, 50),
-            "GIGN": pygame.Rect(0, 0, 300, 50),
-            "Auto-Select": pygame.Rect(0, 0, 300, 50),
+            "1. SEAL Team 6": pygame.Rect(0, 0, 300, 50),
+            "2. GSG 9": pygame.Rect(0, 0, 300, 50),
+            "3. SAS": pygame.Rect(0, 0, 300, 50),
+            "4. GIGN": pygame.Rect(0, 0, 300, 50),
+            "5. Auto-Select": pygame.Rect(0, 0, 300, 50),
         }
         y_start = self.menu_rect.top + 50
         for i, rect in enumerate(counter_terrorists_buttons.values()):
@@ -112,3 +115,31 @@ class Menu:
                 text_surf = self.font.render(name, True, (255, 255, 255))
                 text_rect = text_surf.get_rect(center=rect.center)
                 self.display_surface.blit(text_surf, text_rect)
+
+    def handle_event(self, event : pygame.event.EventType):
+        
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_m:  
+            print("fdsfds")
+            self.val = ""
+            self.toggle()
+            self.buttons = self.main_buttons
+        
+        if event.type == pygame.MOUSEBUTTONDOWN and self.main_active and event.button == 1:
+            mouse_pos = pygame.mouse.get_pos()
+            for name, rect in self.buttons.items():
+                if rect.collidepoint(mouse_pos):
+                    print(f"{name} button clicked")
+                    if name == 'Terrorists' :
+                        self.buttons = self.terrorists_buttons
+                        self.val = "t"
+                    elif name == 'Counter-Terrorists' :
+                        self.buttons = self.counter_terrorists_buttons
+                        self.val = "ct"
+                    elif name == 'Close':
+                        self.toggle()
+                    else:
+                        num = int(name[0])
+                        if num == 5:
+                            num = random.randrange(1,4)
+                        self.val += str(num)
+                        self.toggle()
