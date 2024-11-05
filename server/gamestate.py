@@ -49,6 +49,7 @@ class GameState:
             'wp_index': 1,
             'sp_index': 0,
             'knife_sl': [],
+            'leg_index' : 0,
             'nade':[],
             'dead': False,
             'firing': False,
