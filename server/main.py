@@ -24,7 +24,7 @@ class ProxyServer:
         new_port = self.port + len(self.servers) + 1
         game_server = Server(self.host, new_port, self.max_client)
         
-        server_thread = threading.Thread(target=game_server.run,args=(self.servers), daemon=True)
+        server_thread = threading.Thread(target=game_server.run,args=(self.servers,), daemon=True)
         server_thread.start()
 
         
