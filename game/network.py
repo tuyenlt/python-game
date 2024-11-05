@@ -6,7 +6,7 @@ class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  
         self.client.settimeout(20)
-        self.server = "127.0.0.1"
+        self.server = "192.168.1.9"
         self.port = 5555
         self.addr = (self.server, self.port)
         self.local_data = {
@@ -48,6 +48,26 @@ class Network:
         data, _ = self.client.recvfrom(MAX_DATA_SIZE)
         return json.loads(data.decode())
     
+    def get_servers_list(self):
+        req = {
+            'flag' : 1,
+        }
+        self.client.sendto(json.dumps(req).encode(), (self.server, self.port))
+        data, _ = self.client.recvfrom(MAX_DATA_SIZE)
+        return json.loads(data.decode())
+        
+    def create_new_server(self, name):
+        req = {
+            'flag' : 2,
+            'name' : name
+        }
+        self.client.sendto(json.dumps(req).encode(), (self.server, self.port))
+        data, _ = self.client.recvfrom(MAX_DATA_SIZE)
+        return json.loads(data.decode())
+    
+    def join_server(self, host, port):
+        self.addr = (host, port)
+    
     def fetch_data(self):
         try:
             self.client.sendto(json.dumps(self.local_data).encode(), self.addr)
@@ -68,6 +88,14 @@ class Network:
             print(f"Socket error while listening: {e}")
             return None
     
+    def disconect_to_current_server(self, id):
+        disconnected_message = {
+                'flag' : -1,
+                'id' : id
+            }
+        self.client.sendto(json.dumps(disconnected_message).encode(), self.addr)
+        self.addr = (self.server, self.port)
+    
     def shut_down(self, id):
         try:
             disconnected_message = {
@@ -77,4 +105,5 @@ class Network:
             self.client.sendto(json.dumps(disconnected_message).encode(), self.addr)
             self.client.close()  
         except Exception as e:
-            print(f"Error during shutdown: {e}")
+            # print(f"Error during shutdown: {e}")
+            pass

@@ -91,7 +91,6 @@ class Menu:
         }
 
     def create_counter_terrorists_menu_buttons(self):
-        # Counter-terrorists menu buttons
         self.counter_terrorists_buttons = {
             "SEAL Team 6": pygame_gui.elements.UIButton(
                 relative_rect=pygame.Rect(150, 50, 300, 50),

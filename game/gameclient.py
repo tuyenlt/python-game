@@ -12,10 +12,11 @@ from game.input_event import InputEvent
 from game.leg import Leg
 from game.ultis.func import distance
 from game.ui.message_bar import MessageBar
+from game.ui.stat import StatsMenu
 
 from game.ui.ui import UI
-class Map:
-    def __init__(self, id, team):
+class GameClient:
+    def __init__(self, id, team, network):
         self.display_surface =  pygame.display.get_surface() 
         self.visible_sprites = CameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
@@ -23,10 +24,12 @@ class Map:
         self.totals_player = pygame.sprite.Group()
         self.player_id = []
         self.bullets = []
-        self.network = Network()
+        self.network = network
         self.mouse_clicking = False
         self.sound_channel_cnt = 0
         self.msg_bar = MessageBar((SRC_WIDTH - 400, 100), (400, SRC_HEIGHT - 200), 80)
+        self.stats_menu = StatsMenu(800, 600)
+        self.time = ""
         
         LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
         Weapon.init(self.visible_sprites, self.obstacles_sprites)
@@ -79,6 +82,12 @@ class Map:
             if event.type ==  pygame.MOUSEBUTTONUP:                
                 if event.button == 1:
                     self.mouse_clicking = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_TAB:
+                   self.stats_menu.show()
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_TAB:
+                    self.stats_menu.hide()
                     
         if self.local_player.selected_weapon.type == "auto":
             self.local_player.firing = self.mouse_clicking
@@ -125,18 +134,34 @@ class Map:
         
         for player in self.online_player:
             if player.firing == True:
-                print("boom boom")
                 player.fire()
-        self.msg_bar.update(self.network.server_data['msg'])                
+        self.msg_bar.update(self.network.server_data['msg'])  
+        self.stats_menu.update_players_stat(self.network.server_data['stat']) 
+        self.time = self.network.server_data['time']  
+        self.win = self.network.server_data['win']
+        if self.win:
+            print(self.win)           
                      
     def run(self, mouse_clicking = False):
         self.volume_control()
         self.visible_sprites.update()
         self.network_update()
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
-        self.ui.display(self.local_player)
+        self.ui.display(self.local_player, self.time)
         self.msg_bar.display()
+        self.stats_menu.draw(self.display_surface, (250, 60))
                 
+    def cleanup(self):
+        self.network.shut_down(self.local_player.id)
+        self.bullets.clear()
+        self.online_player.empty() 
+
+        del self.msg_bar
+        del self.stats_menu
+
+            
+    def __del__(self):
+        self.cleanup()            
         
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):

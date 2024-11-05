@@ -1,6 +1,24 @@
 import pygame
 
 class Menu:
+	# def draw(self, surface):
+	# 	action = False
+	# 	#get mouse position
+	# 	pos = pygame.mouse.get_pos()
+
+	# 	#check mouseover and clicked conditions
+	# 	if self.rect.collidepoint(pos):
+	# 		if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+	# 			self.clicked = True
+	# 			action = True
+
+	# 	if pygame.mouse.get_pressed()[0] == 0:
+	# 		self.clicked = False
+
+	# 	#draw button on screen
+	# 	surface.blit(self.image, (self.rect.x, self.rect.y))
+
+	# 	return action
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font('assets/fonts/korean.ttf', 20)  
@@ -94,4 +112,3 @@ class Menu:
                 text_surf = self.font.render(name, True, (255, 255, 255))
                 text_rect = text_surf.get_rect(center=rect.center)
                 self.display_surface.blit(text_surf, text_rect)
-    

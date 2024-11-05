@@ -1,11 +1,11 @@
-import pygame, sys
+import pygame, sys, time
 from pygame.locals import *
 from game.settings import *
-from game.map import Map
+from game.gameclient import GameClient
 from game.ui.button import Button
 from game.ui.menu import Menu
+from game.network import Network
 from game.introduction.intro import Intro
-# from game.ui.scoreboard import Scoreboard
 
 class Game:
     def __init__(self):
@@ -14,51 +14,53 @@ class Game:
         self.screen = pygame.display.set_mode((SRC_WIDTH, SRC_HEIGHT))
         pygame.display.set_caption("2D Shootting")
         self.clock = pygame.time.Clock()
-        self.map = None
+        self.game_client = None
         self.events = NOEVENT
         
         self.font = pygame.font.Font('assets/fonts/digital-7.ttf', 30)
         self.menu = Menu()
-        # self.scoreboard = Scoreboard()
+        self.network = Network()  
+        
         self.intro = Intro()
+    
+    def main_menu(self):
+        print("active server")
+        print(self.network.get_servers_list())
+        # name  = input()
+        name  = "dfsds"
+        (address) = self.network.create_new_server(name)
+        print(address)
+        (host, port) = address
+        self.network.join_server(host, port)
         
     def run(self):
+        self.main_menu()
         while True:
-            
             self.events = pygame.event.get()
             for event in self.events:
-                # self.screen.blit(self.intro.background)
                 if event.type == pygame.QUIT:
-                    if self.map:
-                        self.map.network.shut_down(self.map.local_player.id)
+                    if self.game_client:
+                        self.game_client.network.shut_down(self.game_client.local_player.id)
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_m:  
                     self.menu.toggle()
                     self.menu.buttons = self.menu.main_buttons
-                # if event.type == pygame.KEYDOWN:
-                #     if event.key == pygame.K_TAB:
-                #         self.scoreboard.show_scoreboard = True  # Hiển thị bảng điểm
-                # elif event.type == pygame.KEYUP:
-                #     if event.key == pygame.K_TAB:
-                #         self.scoreboard.show_scoreboard = False  # Ẩn bảng điểm
                     
                 self.intro.handle_event(event)
                 self.handle_event(event)
-            if self.map:
+            if self.game_client:
                 self.screen.fill((255,255,255))
-                self.map.event_handle(self.events)    
-                self.map.run()
+                self.game_client.event_handle(self.events)    
+                self.game_client.run()
+                self.game_client.pointer_rect.center = pygame.mouse.get_pos()
+                self.screen.blit(self.game_client.pointer_image, self.game_client.pointer_rect)
             else:
                 self.screen.fill((190,158,108))
+                self.intro.draw()
+                if self.intro.intro_menu_active == False :
+                    self.menu.draw()
+                   
             
-            #draw pointer
-            if self.map:
-                self.map.pointer_rect.center = pygame.mouse.get_pos()
-                self.screen.blit(self.map.pointer_image, self.map.pointer_rect)
-            
-            self.intro.draw()
-            if self.intro.intro_menu_active == False :
-                self.menu.draw()
             #show fps
             fps = self.clock.get_fps()
             interger_part = int(fps)
@@ -87,20 +89,23 @@ class Game:
                         print(f"{name} button clicked")
                         if name == 'Terrorists' :
                             self.menu.buttons = self.menu.terrorists_buttons
-                            if not self.map:
-                                self.map = Map('toan', "t")
+                            for sub_name, sub_rect in self.menu.buttons.items() :
+                                pass
+                            
+                            if not self.game_client:
+                                self.game_client = GameClient('toan', "t", self.network)
                             else:
-                                self.map.local_player.switch_team("t")
-                                self.map.network.change_team_request(self.map.local_player.id,"t")
-                                
+                                self.game_client.local_player.switch_team("t")
+                                self.game_client.network.change_team_request(self.game_client.local_player.id,"t")
                         elif name == 'Counter-Terrorists' :
                             self.menu.buttons = self.menu.counter_terrorists_buttons
-                            if not self.map:
-                                self.map = Map('tuyen', "ct")
+                            for sub_name, sub_rect in self.menu.buttons.items() :
+                                pass
+                            if not self.game_client:
+                                self.game_client = GameClient('tuyen', "ct", self.network)
                             else:
-                                self.map.local_player.switch_team("ct")
-                                self.map.network.change_team_request(self.map.local_player.id,"ct")
-                                
+                                self.game_client.local_player.switch_team("ct")
+                                self.game_client.network.change_team_request(self.game_client.local_player.id,"ct")
                         else :
                             self.menu.toggle()
     
