@@ -16,7 +16,7 @@ from game.ui.stat import StatsMenu
 
 from game.ui.ui import UI
 class GameClient:
-    def __init__(self, id, team):
+    def __init__(self, id, team, network):
         self.display_surface =  pygame.display.get_surface() 
         self.visible_sprites = CameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
@@ -24,11 +24,12 @@ class GameClient:
         self.totals_player = pygame.sprite.Group()
         self.player_id = []
         self.bullets = []
-        self.network = Network()
+        self.network = network
         self.mouse_clicking = False
         self.sound_channel_cnt = 0
         self.msg_bar = MessageBar((SRC_WIDTH - 400, 100), (400, SRC_HEIGHT - 200), 80)
         self.stats_menu = StatsMenu(800, 600)
+        self.time = ""
         
         LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
         Weapon.init(self.visible_sprites, self.obstacles_sprites)
@@ -133,20 +134,34 @@ class GameClient:
         
         for player in self.online_player:
             if player.firing == True:
-                print("boom boom")
                 player.fire()
         self.msg_bar.update(self.network.server_data['msg'])  
-        self.stats_menu.update_players_stat(self.network.server_data['stat'])              
+        self.stats_menu.update_players_stat(self.network.server_data['stat']) 
+        self.time = self.network.server_data['time']  
+        self.win = self.network.server_data['win']
+        if self.win:
+            print(self.win)           
                      
     def run(self, mouse_clicking = False):
         self.volume_control()
         self.visible_sprites.update()
         self.network_update()
         self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
-        self.ui.display(self.local_player)
+        self.ui.display(self.local_player, self.time)
         self.msg_bar.display()
         self.stats_menu.draw(self.display_surface, (250, 60))
                 
+    def cleanup(self):
+        self.network.shut_down(self.local_player.id)
+        self.bullets.clear()
+        self.online_player.empty() 
+
+        del self.msg_bar
+        del self.stats_menu
+
+            
+    def __del__(self):
+        self.cleanup()            
         
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):

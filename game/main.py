@@ -1,9 +1,10 @@
-import pygame, sys
+import pygame, sys, time
 from pygame.locals import *
 from game.settings import *
 from game.gameclient import GameClient
 from game.ui.button import Button
 from game.ui.menu import Menu
+from game.network import Network
 
 class Game:
     def __init__(self):
@@ -17,8 +18,20 @@ class Game:
         
         self.font = pygame.font.Font('assets/fonts/digital-7.ttf', 30)
         self.menu = Menu()
+        self.network = Network()  
+    
+    def main_menu(self):
+        print("active server")
+        print(self.network.get_servers_list())
+        # name  = input()
+        name  = "dfsds"
+        (address) = self.network.create_new_server(name)
+        print(address)
+        (host, port) = address
+        self.network.join_server(host, port)
         
     def run(self):
+        self.main_menu()
         while True:
             self.events = pygame.event.get()
             for event in self.events:
@@ -35,15 +48,12 @@ class Game:
                 self.screen.fill((255,255,255))
                 self.game_client.event_handle(self.events)    
                 self.game_client.run()
-            else:
-                self.screen.fill((190,158,108))
-            
-            #draw pointer
-            if self.game_client:
                 self.game_client.pointer_rect.center = pygame.mouse.get_pos()
                 self.screen.blit(self.game_client.pointer_image, self.game_client.pointer_rect)
-            
-            self.menu.draw()
+            else:
+                self.screen.fill((190,158,108))
+                self.menu.draw()
+                   
             
             #show fps
             fps = self.clock.get_fps()
@@ -78,7 +88,7 @@ class Game:
                                 pass
                             
                             if not self.game_client:
-                                self.game_client = GameClient('toan', "t")
+                                self.game_client = GameClient('toan', "t", self.network)
                             else:
                                 self.game_client.local_player.switch_team("t")
                                 self.game_client.network.change_team_request(self.game_client.local_player.id,"t")
@@ -87,7 +97,7 @@ class Game:
                             for sub_name, sub_rect in self.menu.buttons.items() :
                                 pass
                             if not self.game_client:
-                                self.game_client = GameClient('tuyen', "ct")
+                                self.game_client = GameClient('tuyen', "ct", self.network)
                             else:
                                 self.game_client.local_player.switch_team("ct")
                                 self.game_client.network.change_team_request(self.game_client.local_player.id,"ct")

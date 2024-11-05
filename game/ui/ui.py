@@ -31,17 +31,8 @@ class UI:
         self.display_surface.blit(hp_text_render, hp_text_rect)
         self.display_surface.blit(hp_symbol_surf, hp_symbol_rect)
 
-    def show_timer(self):
-        elapsed_time = time.time() - self.start_time
-        remaining_time = self.countdown_seconds - elapsed_time
-        
-        if remaining_time < 0:
-            remaining_time = 0  
-
-        minutes = int(remaining_time // 60)
-        seconds = int(remaining_time % 60)
-
-        timer_text = f"{minutes:02}:{seconds:02}"  
+    def show_timer(self, time):
+        timer_text = time
         timer_text_render = self.font.render(timer_text, False, (255,232,80))  
         timer_rect = timer_text_render.get_rect()
         
@@ -83,7 +74,7 @@ class UI:
             self.display_surface.blit(bullet_text_render, bullet_text_rect)
             self.display_surface.blit(bullet_symbol_surf, bullet_symbol_rect)
     
-    def display(self, player):
+    def display(self, player, time):
         self.show_hp(player.hp)
-        self.show_timer()  
+        self.show_timer(time)  
         self.show_bullet(player.selected_weapon)
