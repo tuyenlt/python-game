@@ -21,6 +21,9 @@ class OnlinePlayer(Player):
             self.selected_weapon.rotate(-self.angle)
     
     def load_data(self, data):
+        if self.team != data['team']:
+            self.team = data['team']
+            self.switch_team(self.team)
         self.hitbox.center = data['pos']
         self.hp = data['hp']
         self.angle = data['angle']

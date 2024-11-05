@@ -14,8 +14,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__(sprite_groups)
         self.sprite_groups = sprite_groups[0]
         #* display init
-        self.cloth_index= "1"
-        self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}{self.cloth_index}.bmp").convert_alpha()
+        self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}.bmp").convert_alpha()
         self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
         self.dead_image = pygame.image.load(f"./assets/gfx/player/dead.png")
         self.dead_sound = pygame.mixer.Sound("./assets/sounds/player/die1.wav")
@@ -51,10 +50,10 @@ class Player(pygame.sprite.Sprite):
         
     def weapons_init(self):
         self.weapons_list = [None] * 6
-        if self.team == 'ct':
+        if self.team[:-1] == 'ct':
             self.weapons_list[1] = Gun( owner=self, sound_channel= self.sound_channel ,name="m4a1")
             self.weapons_list[2] = Gun( owner=self, sound_channel= self.sound_channel ,name="usp")
-        if self.team == 't':
+        if self.team[:-1] == 't':
             self.weapons_list[1] = Gun( owner=self, sound_channel= self.sound_channel ,name="ak47")
             self.weapons_list[2] = Gun( owner=self, sound_channel= self.sound_channel ,name="glock18")
         self.weapons_list[3] = Knife( owner= self, sound_channel= self.sound_channel)
@@ -73,7 +72,7 @@ class Player(pygame.sprite.Sprite):
         for weapon in self.weapons_list:
             if weapon != None:
                 weapon.kill()
-        self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}1.bmp").convert_alpha() 
+        self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}.bmp").convert_alpha() 
         self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
         self.weapons_init() 
         

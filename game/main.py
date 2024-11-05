@@ -42,6 +42,19 @@ class Game:
                     if self.game_client:
                         self.game_client.network.shut_down(self.game_client.local_player.id)
                     sys.exit()
+                self.menu.handle_event(event)    
+            
+            if self.menu.val not in ["", "t", "ct"]:
+                if not self.game_client:
+                    self.game_client = GameClient("tuyen", self.menu.val, self.network)
+                else:
+                    self.network.change_team_request(self.game_client.local_player.id, self.menu.val)    
+                    self.game_client.local_player.switch_team(self.menu.val)
+                self.menu.val = ""
+                    
+                    
+                        
+                
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_m:  
                     self.menu.toggle()
                     self.menu.buttons = self.menu.main_buttons
@@ -58,7 +71,8 @@ class Game:
                 self.screen.fill((190,158,108))
                 self.intro.draw()
                 if self.intro.intro_menu_active == False :
-                    self.menu.draw()
+                    pass
+            self.menu.draw()
                    
             
             #show fps
@@ -82,10 +96,11 @@ class Game:
             self.clock.tick(FPS)                       
                             
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and self.menu.main_active and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONDOWN and self.menu.main_active:
             mouse_pos = pygame.mouse.get_pos()
             for name, rect in self.menu.buttons.items():
                 if rect.collidepoint(mouse_pos):
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         print(f"{name} button clicked")
                         if name == 'Terrorists' :
                             self.menu.buttons = self.menu.terrorists_buttons
