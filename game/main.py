@@ -4,6 +4,7 @@ from game.settings import *
 from game.map import Map
 from game.ui.button import Button
 from game.ui.menu import Menu
+from game.introduction.intro import Intro
 # from game.ui.scoreboard import Scoreboard
 
 class Game:
@@ -19,11 +20,14 @@ class Game:
         self.font = pygame.font.Font('assets/fonts/digital-7.ttf', 30)
         self.menu = Menu()
         # self.scoreboard = Scoreboard()
+        self.intro = Intro()
         
     def run(self):
         while True:
+            
             self.events = pygame.event.get()
             for event in self.events:
+                # self.screen.blit(self.intro.background)
                 if event.type == pygame.QUIT:
                     if self.map:
                         self.map.network.shut_down(self.map.local_player.id)
@@ -38,6 +42,7 @@ class Game:
                 #     if event.key == pygame.K_TAB:
                 #         self.scoreboard.show_scoreboard = False  # Ẩn bảng điểm
                     
+                self.intro.handle_event(event)
                 self.handle_event(event)
             if self.map:
                 self.screen.fill((255,255,255))
@@ -51,8 +56,9 @@ class Game:
                 self.map.pointer_rect.center = pygame.mouse.get_pos()
                 self.screen.blit(self.map.pointer_image, self.map.pointer_rect)
             
-            self.menu.draw()
-            
+            self.intro.draw()
+            if self.intro.intro_menu_active == False :
+                self.menu.draw()
             #show fps
             fps = self.clock.get_fps()
             interger_part = int(fps)
@@ -74,11 +80,10 @@ class Game:
             self.clock.tick(FPS)                       
                             
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and self.menu.main_active:
+        if event.type == pygame.MOUSEBUTTONDOWN and self.menu.main_active and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
             for name, rect in self.menu.buttons.items():
                 if rect.collidepoint(mouse_pos):
-                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         print(f"{name} button clicked")
                         if name == 'Terrorists' :
                             self.menu.buttons = self.menu.terrorists_buttons
