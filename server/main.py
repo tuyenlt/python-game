@@ -7,7 +7,11 @@ from settings import *
 from gamestate import GameState
 
 # HOST = '192.168.1.27'
-HOST = ''
+
+hostname = socket.gethostname()
+local_ip = socket.gethostbyname(hostname)
+
+HOST = local_ip
 PORT = 5555
 
 

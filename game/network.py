@@ -5,14 +5,22 @@ import configparser
 
 config = configparser.ConfigParser()
 config.read('config.cfg')
-HOST = config['main_server']['host']
-PORT = int(config['main_server']['port'])
+
+HOST = config['server_config']['host']
+PORT = int(config['server_config']['port'])
+LOCAL = int(config['server_config']['local'])
+
+
 class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  
         self.client.settimeout(20)
-        
-        self.server = HOST 
+        if LOCAL == 1:
+            hostname = socket.gethostname()
+            local_ip = socket.gethostbyname(hostname)        
+            self.server = local_ip
+        else:
+            self.server = HOST
         self.port = PORT 
         
         self.addr = (self.server, self.port)

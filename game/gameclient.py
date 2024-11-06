@@ -5,7 +5,7 @@ from game.settings import *
 from game.player import Player
 from game.online_player import OnlinePlayer
 from game.tile import Tile
-from game.weapon import Gun, Knife, Weapon
+from game.weapon import Gun, Grenade, Weapon
 from game.leg import Leg
 from game.ultis.func import distance
 from game.ui.message_bar import MessageBar
@@ -21,6 +21,7 @@ class GameClient:
         self.obstacles_sprites = pygame.sprite.Group()
         self.online_player = pygame.sprite.Group()
         self.totals_player = pygame.sprite.Group()
+        
         self.player_id = []
         self.bullets = []
         self.network = network
@@ -81,7 +82,6 @@ class GameClient:
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_TAB:
                     self.stats_menu.hide()
-                    
         if self.local_player.selected_weapon.type == "auto":
             self.local_player.firing = self.mouse_clicking
         if self.local_player.firing:
@@ -153,11 +153,8 @@ class GameClient:
     def cleanup(self):
         self.bullets.clear()
         self.online_player.empty() 
-
         del self.msg_bar
         del self.stats_menu
-
-            
     def __del__(self):
         self.cleanup()            
         

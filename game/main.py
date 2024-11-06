@@ -134,7 +134,7 @@ class Game:
 
                 if event.type == MOUSEBUTTONDOWN and self.pause_menu.active:
                     if self.pause_menu.disconnect_rect.collidepoint(mouse_pos):
-                        self.network.disconect_to_current_server(self.game_client.local_player.id)
+                        self.network.disconect_to_current_server()
                         del self.game_client
                         self.game_client = None
                         self.pause_menu.toggle()
