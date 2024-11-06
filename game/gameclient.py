@@ -42,7 +42,6 @@ class GameClient:
         self.pointer_image = get_animation_from_img('assets/images/pointer.bmp', 46, (255, 0, 255))[0]
         self.pointer_rect = self.pointer_image.get_rect()
         
-        # UI
         self.ingame_ui = IngameUI()
         
         
@@ -100,7 +99,6 @@ class GameClient:
     def network_update(self):
         self.network.local_data = {
             'flag' : 2,
-            'id' : self.local_player.id,
             'player' : self.local_player.get_data()
         }
         self.network.fetch_data()
@@ -128,8 +126,11 @@ class GameClient:
         for player in self.online_player:
             if player.firing == True:
                 player.fire()
+                
         self.msg_bar.update(self.network.server_data['msg'])  
+        
         self.stats_menu.update_players_stat(self.network.server_data['stat']) 
+        
         self.time = self.network.server_data['time']  
         if self.network.server_data['win'] == "t":
             self.win_popup.update("Terrorists Win")
@@ -160,6 +161,9 @@ class GameClient:
     def __del__(self):
         self.cleanup()            
         
+        
+        
+        
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
         super().__init__()       
@@ -178,9 +182,10 @@ class CameraGroup(pygame.sprite.Group):
         self.offset.x = self.local_player.hitbox.centerx - CENTER_X
         self.offset.y = self.local_player.hitbox.centery - CENTER_Y
         #* draw floor
-        floor_offset_pos = self.floor_rect.topleft - self.offset
-        self.display_surface.blit(self.floor_surf, floor_offset_pos) 
         
+        floor_offset_pos = self.floor_rect.topleft - self.offset
+        self.display_surface.fill((190,158,108))
+        self.display_surface.blit(self.floor_surf, floor_offset_pos) 
         for sprite in self.sprites():
             if sprite.__class__.__name__ == 'Leg':
                 offset_pos = sprite.rect.topleft - self.offset

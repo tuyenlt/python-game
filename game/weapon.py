@@ -208,6 +208,7 @@ class Grenade(Weapon):
         self.speed_x = 0
         self.speed_y = 0
     
+    
     def grenade_init(self):
         if self.name == "he":
             self.dmg = 50
@@ -220,6 +221,8 @@ class Grenade(Weapon):
         self.throw_hook.finished = False
         self.throw_hook.time_cnt = 2.2
         self.explode_img_index = 0
+        self.rect.centerx = self.owner.hitbox.centerx + self.offset_x
+        self.rect.centery = self.owner.hitbox.centery + self.offset_y
         
     def rotate(self, angle):
         if not self.onthrow:
