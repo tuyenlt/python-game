@@ -42,7 +42,7 @@ class GameClient:
         #pointer 
         self.pointer_image = get_animation_from_img('assets/images/pointer.bmp', 46, (255, 0, 255))[0]
         self.pointer_rect = self.pointer_image.get_rect()
-        
+        pygame.mouse.set_visible(False)
         self.ingame_ui = IngameUI()
         
         

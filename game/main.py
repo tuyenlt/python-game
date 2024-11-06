@@ -134,9 +134,12 @@ class Game:
 
                 if event.type == MOUSEBUTTONDOWN and self.pause_menu.active:
                     if self.pause_menu.disconnect_rect.collidepoint(mouse_pos):
+                        pygame.mouse.set_visible(True)
+                        
                         self.network.disconect_to_current_server()
                         del self.game_client
                         self.game_client = None
+                        
                         self.pause_menu.toggle()
                         self.select_menu.buttons = self.select_menu.main_buttons
                         self.select_menu.toggle()
@@ -165,12 +168,12 @@ class Game:
                 self.game_client.event_handle(self.events)    
                 self.game_client.run()
                 self.game_client.pointer_rect.center = pygame.mouse.get_pos()
-                self.screen.blit(self.game_client.pointer_image, self.game_client.pointer_rect)
             else:
                 self.screen.fill((190,158,108))
-                
             self.select_menu.draw()
             self.pause_menu.draw()
+            if self.game_client:    
+                self.screen.blit(self.game_client.pointer_image, self.game_client.pointer_rect)
             
             #show fps
             fps = self.clock.get_fps()
