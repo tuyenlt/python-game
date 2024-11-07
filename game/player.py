@@ -52,14 +52,17 @@ class Player(pygame.sprite.Sprite):
         
     def weapons_init(self):
         self.weapons_list = [None] * 6
+        
         if self.team[:-1] == 'ct':
             self.weapons_list[1] = Gun( owner=self, sound_channel= self.sound_channel ,name="m4a1")
             self.weapons_list[2] = Gun( owner=self, sound_channel= self.sound_channel ,name="usp")
+            
         if self.team[:-1] == 't':
             self.weapons_list[1] = Gun( owner=self, sound_channel= self.sound_channel ,name="ak47")
             self.weapons_list[2] = Gun( owner=self, sound_channel= self.sound_channel ,name="glock18")
         self.weapons_list[3] = Knife( owner= self, sound_channel= self.sound_channel)
         self.weapons_list[4] = Grenade( owner= self,sound_channel= self.sound_channel,name="he")
+        
         Gun.sprite_groups.remove(self.weapons_list[2])
         Gun.sprite_groups.remove(self.weapons_list[3])
         Gun.sprite_groups.remove(self.weapons_list[4])

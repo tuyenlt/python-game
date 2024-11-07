@@ -18,12 +18,12 @@ class Network:
         if LOCAL == 1:
             hostname = socket.gethostname()
             local_ip = socket.gethostbyname(hostname)        
-            self.server = local_ip
+            host = local_ip
         else:
-            self.server = HOST
-        self.port = PORT 
-        
-        self.addr = (self.server, self.port)
+            host = HOST
+        port = PORT 
+        self.proxy_addr = (host, port)
+        self.addr = self.proxy_addr
         self.local_data = {}
         self.server_data = {}
 
@@ -39,7 +39,7 @@ class Network:
         req = {
             'flag' : 1,
         }
-        self.client.sendto(json.dumps(req).encode(), (self.server, self.port))
+        self.client.sendto(json.dumps(req).encode(), self.proxy_addr)
         data, _ = self.client.recvfrom(MAX_DATA_SIZE)
         return json.loads(data.decode())
         
@@ -48,18 +48,20 @@ class Network:
             'flag' : 2,
             'name' : name
         }
-        self.client.sendto(json.dumps(req).encode(), (self.server, self.port))
+        self.client.sendto(json.dumps(req).encode(), self.proxy_addr)
         data, _ = self.client.recvfrom(MAX_DATA_SIZE)
-        return json.loads(data.decode())
+        host, port = json.loads(data.decode()) 
+        self.addr = (host, port)
     
     def join_server(self, host, port):
         req = {
             'flag' : 3,
             'port' : port
         }
-        self.client.sendto(json.dumps(req).encode(), (self.server, self.port))
+        self.client.sendto(json.dumps(req).encode(),self.proxy_addr)
         self.addr = (host, port)
-        print(self.addr)
+    
+    
     
     def player_init(self, player_id, team):
         init_data = {
@@ -86,7 +88,6 @@ class Network:
                 'flag' : -1,
             }
         self.client.sendto(json.dumps(disconnected_message).encode(), self.addr)
-        self.addr = (self.server, self.port) ## 
     
     def shut_down(self, id):
         try:

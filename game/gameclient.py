@@ -73,17 +73,22 @@ class GameClient:
                     if self.local_player.selected_weapon.type == "single":
                         self.local_player.firing = True
                     self.mouse_clicking = True
+                    
             if event.type ==  pygame.MOUSEBUTTONUP:                
                 if event.button == 1:
                     self.mouse_clicking = False
+                    
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_TAB:
                    self.stats_menu.show()
+                   
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_TAB:
                     self.stats_menu.hide()
+                    
         if self.local_player.selected_weapon.type == "auto":
             self.local_player.firing = self.mouse_clicking
+            
         if self.local_player.firing:
             self.local_player.fire()
 
@@ -142,8 +147,8 @@ class GameClient:
                      
     def run(self):
         self.volume_control()
-        self.visible_sprites.update()
         self.network_update()
+        self.visible_sprites.update()
         self.visible_sprites.display(self.bullets)    
         self.ingame_ui.display(self.local_player, self.time)
         self.msg_bar.display()
@@ -175,14 +180,14 @@ class CameraGroup(pygame.sprite.Group):
         self.local_player = local_player    
         
     def display(self, bullets):
-        #* get the offset
         self.offset.x = self.local_player.hitbox.centerx - CENTER_X
         self.offset.y = self.local_player.hitbox.centery - CENTER_Y
-        #* draw floor
         
         floor_offset_pos = self.floor_rect.topleft - self.offset
         self.display_surface.fill((190,158,108))
         self.display_surface.blit(self.floor_surf, floor_offset_pos) 
+        
+        
         for sprite in self.sprites():
             if sprite.__class__.__name__ == 'Leg':
                 offset_pos = sprite.rect.topleft - self.offset
@@ -194,7 +199,6 @@ class CameraGroup(pygame.sprite.Group):
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_pos)
         
-        #* bullet hitting the player        
         for bullet in bullets:
             bullet.display(self.display_surface, self.offset)
             if bullet.display_frame == 0:

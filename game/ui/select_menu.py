@@ -20,7 +20,8 @@ class SelectMenu:
         self.buttons = self.create_main_buttons()
         self.done = False
         self.val = ""
-        
+        self.is_first_open = True
+
 
     def create_main_buttons(self):
         main_buttons = {
@@ -86,6 +87,8 @@ class SelectMenu:
 
             mouse_pos = pygame.mouse.get_pos()
             for name, rect in self.buttons.items():
+                if self.is_first_open and name == "Close":
+                    continue
                 color = (100, 100, 100)  
                 if rect.collidepoint(mouse_pos):
                     color = (150, 150, 150)
@@ -105,6 +108,8 @@ class SelectMenu:
         if event.type == pygame.MOUSEBUTTONDOWN and self.main_active and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
             for name, rect in self.buttons.items():
+                if self.is_first_open and name == "Close":
+                    continue
                 if rect.collidepoint(mouse_pos):
                     if name == 'Terrorists' :
                         self.buttons = self.terrorists_buttons

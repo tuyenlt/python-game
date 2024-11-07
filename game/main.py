@@ -2,7 +2,6 @@ import pygame, sys, time
 from pygame.locals import *
 from game.settings import *
 from game.gameclient import GameClient
-from game.ui.button import Button
 from game.ui.select_menu import SelectMenu
 from game.ui.pause_menu import PauseMenu
 from game.network import Network, HOST
@@ -19,7 +18,7 @@ class Game:
         self.game_client = None
         self.events = NOEVENT
         
-        self.font = pygame.font.Font('assets/fonts/digital-7.ttf', 30)
+        self.font = pygame.font.Font('assets/fonts/digital-7.ttf', 30) 
         self.select_menu = SelectMenu()
         self.network = Network()
         self.pause_menu = PauseMenu()
@@ -30,10 +29,11 @@ class Game:
     def main_menu(self):
         self.main_menu_running = True  
         self.start_menu = StartMenu()
+        
         def create_done():
             new_server_name = self.start_menu.server_name_input.text
             self.start_menu.server_name_input.text = ""
-            self.start_menu.addr = self.network.create_new_server(new_server_name)
+            self.network.create_new_server(new_server_name)
             self.main_menu_running = False
         
         def change_name_done():
@@ -78,13 +78,14 @@ class Game:
                     if self.start_menu.join:
                         for name, rect, host, port , curr_player in self.start_menu.join_buttons:
                             if rect.collidepoint(mouse_pos) and curr_player < 12:
-                                self.start_menu.addr = (host, port)
+                                self.network.join_server(host, int(port))
                                 self.main_menu_running = False
                                 
                 if self.start_menu.change_name:
                     self.start_menu.name_input.handle_event(event)                
                     if event.type == MOUSEBUTTONDOWN and self.start_menu.sm_button.collidepoint(mouse_pos):
                         change_name_done()
+                        
                 if self.start_menu.create:
                     self.start_menu.server_name_input.handle_event(event)                
                     if event.type == MOUSEBUTTONDOWN and self.start_menu.sm_button.collidepoint(mouse_pos):
@@ -93,6 +94,7 @@ class Game:
             self.start_menu.draw()
             pygame.display.update()
             self.clock.tick(FPS)  
+            
         
     def run_intro(self):
         running = True
@@ -109,16 +111,9 @@ class Game:
             self.intro.draw()
         
 
-    def run(self):
-        self.run_intro()
-        while True:
-            self.main_menu()
-            (host, port) = self.start_menu.addr
-            self.network.join_server(HOST, port)
-            self.start_game()
-    
     def start_game(self):
         disconnected = False
+        self.select_menu.is_first_open = True
         while not disconnected:
             self.events = pygame.event.get()
             mouse_pos = pygame.mouse.get_pos()
@@ -127,8 +122,10 @@ class Game:
                     if self.game_client:
                         self.game_client.network.shut_down(self.game_client.local_player.id)
                     sys.exit()
+                    
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and not self.select_menu.main_active:  
                     self.pause_menu.toggle()
+                    
                 if not self.pause_menu.active:
                     self.select_menu.handle_event(event)
 
@@ -164,12 +161,14 @@ class Game:
             
                     
             if self.game_client:
+                self.select_menu.is_first_open = False
                 self.screen.fill((255,255,255))
                 self.game_client.event_handle(self.events)    
                 self.game_client.run()
                 self.game_client.pointer_rect.center = pygame.mouse.get_pos()
             else:
                 self.screen.fill((190,158,108))
+                
             self.select_menu.draw()
             self.pause_menu.draw()
             if self.game_client:    
@@ -183,3 +182,11 @@ class Game:
             
             pygame.display.update()
             self.clock.tick(FPS)                       
+            
+            
+    def run(self):
+        self.run_intro()
+        while True:
+            self.main_menu()
+            self.start_game()
+    

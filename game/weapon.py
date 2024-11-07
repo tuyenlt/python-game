@@ -9,6 +9,7 @@ from game.ultis.resource_loader import get_sprite_from_sheet
 class Weapon(pygame.sprite.Sprite):
     sprite_groups = None
     obtacles = None
+    
     @classmethod
     def init(cls, sprite_groups, obtacles): #! call this func before create any object
         cls.sprite_groups = sprite_groups
@@ -40,6 +41,7 @@ class Weapon(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = self.owner.hitbox.centerx + self.offset_x
         self.rect.centery = self.owner.hitbox.centery + self.offset_y 
+    
         
     def fire(self):
         pass
@@ -113,6 +115,7 @@ class Gun(Weapon):
             self.max_bullets = 30
             self.reload_time = 1
             self.dmg = 10
+            
         self.bullets_remain = self.max_bullets
         
     def fire(self):
