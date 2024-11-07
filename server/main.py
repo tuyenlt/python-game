@@ -20,7 +20,7 @@ class ProxyServer:
         self.host = host
         self.port = port
         self.max_client = max_client
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) ## init for UDP connection
         self.socket.bind((self.host, self.port))
         self.servers = []  
         self.shut_down = False
@@ -121,10 +121,7 @@ class Server:
                 response = self.state.get_current_state().encode()
                 self.socket.sendto(response, addr) 
                 
-            # elif client_data['flag'] == 3: ## 
-            #     self.state.respawn_player(player_id)
-                
-            elif client_data['flag'] == 4: ## change client team
+            elif client_data['flag'] == 3: ## change client team
                 self.state.change_team(player_id, client_data['team'])
                 
             elif client_data['flag'] == -1: ## announce to server before a client disconnect
@@ -140,7 +137,6 @@ class Server:
         
     def run(self, servers_list):
         print(f"Server started on {self.host}:{self.port}")
-        self.state.map_init()
         try:
             while not self.shut_down:
                 data, addr = self.socket.recvfrom(MAX_DATA_SIZE)

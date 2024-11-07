@@ -11,16 +11,14 @@ class GameState:
         self.players = {}
         self.bullets = []
         self.knifes = []
-        self.obtacles = []
-        self.bullet_init_triger = []
         self.invalid_update_keys = ['hp', 'dead', 'stat']
-        self.bullet_change = False
         self.nades = []
         self.message = []
         self.players_stat = {}
         self.round_time = 600
         self.end_time = time.time() + self.round_time
         self.on_reset = False
+        self.map_init()
         
     
     def map_init(self):
@@ -74,7 +72,7 @@ class GameState:
         self.players[player_id]['dead'] = True
         timer = threading.Timer(3, self.init_player, (player_id, team))
         timer.start()
-    
+
     def get_side_state_win(self):
         ct_score = 0
         t_score = 0
@@ -128,9 +126,13 @@ class GameState:
             for (start_pos, end_pos, angle, dmg, id) in self.bullets:
                 if self.players[id]['team'][:-1] == player_data['team'][:-1]:
                     continue
-                if line_rectangle_collision( (start_pos, end_pos),
-                                    (hitbox_x - PLAYER_HITBOX_SIZE / 2, hitbox_y - PLAYER_HITBOX_SIZE / 2, PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE)
-                                    ):
+                if line_rectangle_collision( 
+                                            (start_pos, end_pos),
+                                            (hitbox_x - PLAYER_HITBOX_SIZE / 2,
+                                            hitbox_y - PLAYER_HITBOX_SIZE / 2,
+                                            PLAYER_HITBOX_SIZE,
+                                            PLAYER_HITBOX_SIZE)
+                                            ):
                     player_data['hp'] -= dmg
                     print(f"{id} hit {player_id}")
                     if player_data['hp'] <= 0:
@@ -147,8 +149,11 @@ class GameState:
             for (x,y,w,h, id) in self.knifes:
                 if self.players[id]['team'][:-1] == player_data['team'][:-1]:
                     continue
-                if rectangle_collision((x,y,w,h), (hitbox_x - PLAYER_HITBOX_SIZE / 2, hitbox_y - PLAYER_HITBOX_SIZE / 2,
-                                                   PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE)):
+                if rectangle_collision((x,y,w,h), 
+                                       (hitbox_x - PLAYER_HITBOX_SIZE / 2,
+                                        hitbox_y - PLAYER_HITBOX_SIZE / 2,
+                                        PLAYER_HITBOX_SIZE, 
+                                        PLAYER_HITBOX_SIZE)):
                     player_data['hp'] -= 50
                     print(f"{id} hit {player_id}")
                     if player_data['hp'] <= 0:
@@ -184,7 +189,6 @@ class GameState:
                 
         for bullet in client_data['player']['bullets']:
             self.bullets.append(bullet)
-        self.bullet_change = False
         
         if client_data['player']['bullets'].__len__() > 0:
             self.bullet_handle()
@@ -211,7 +215,7 @@ class GameState:
                 timer.start()
                 for id, player in self.players.items():
                     self.respawn_player(id)
-                
+
         else:
             mins, secs = divmod(int(remaining_time), 60)
             curr_time = '{:02d}:{:02d}'.format(mins, secs)            
